@@ -327,44 +327,37 @@ function generateL4(operation: Operation, numberType: NumberType): { prompt: str
 
 function generateL5(operation: Operation, numberType: NumberType): { prompt: string; answer: number | string } {
   // Hardest: multi-step, pattern recognition
-  let prompt: string, answer: number | string;
-  
   // Multi-step operations
   const a = randomInt(10, 30);
   const b = randomInt(5, 15);
   const c = randomInt(2, 8);
   
-  const patterns = [
-    () => {
-      prompt = `${a} × ${b} + ${c * 10}`;
-      answer = a * b + c * 10;
+  const patterns: Array<{ prompt: string; answer: number | string }> = [
+    {
+      prompt: `${a} × ${b} + ${c * 10}`,
+      answer: a * b + c * 10,
     },
-    () => {
-      prompt = `${a * b} ÷ ${a} + ${c}`;
-      answer = b + c;
+    {
+      prompt: `${a * b} ÷ ${a} + ${c}`,
+      answer: b + c,
     },
-    () => {
+    (() => {
       const sq = randomInt(11, 19);
-      prompt = `${sq}²`;
-      answer = sq * sq;
-    },
-    () => {
+      return { prompt: `${sq}²`, answer: sq * sq };
+    })(),
+    (() => {
       const base = randomInt(2, 5);
       const exp = randomInt(3, 4);
-      prompt = `${base}^${exp}`;
-      answer = Math.pow(base, exp);
-    },
-    () => {
+      return { prompt: `${base}^${exp}`, answer: Math.pow(base, exp) };
+    })(),
+    (() => {
       const pct = randomChoice([10, 15, 20, 25]);
       const value = randomInt(100, 500);
-      prompt = `${pct}% of ${value}`;
-      answer = (pct / 100) * value;
-    },
+      return { prompt: `${pct}% of ${value}`, answer: (pct / 100) * value };
+    })(),
   ];
   
-  randomChoice(patterns)();
-  
-  return { prompt, answer };
+  return randomChoice(patterns);
 }
 
 export function generateQuestionSet(

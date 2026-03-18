@@ -193,3 +193,60 @@ values
   ('mixed_sprint_20', 'Mixed Sprint 20', 20, 120, '{"1":20,"2":30,"3":25,"4":15,"5":10}', '{"add","sub","mul","div"}', '{"integer","decimal","fraction"}', 'Quick 20-question sprint'),
   ('mixed_sprint_40', 'Mixed Sprint 40', 40, 240, '{"1":15,"2":30,"3":25,"4":20,"5":10}', '{"add","sub","mul","div"}', '{"integer","decimal","fraction"}', 'Medium 40-question test'),
   ('fractions_decimals', 'Fractions & Decimals Drill', 30, 300, '{"3":35,"4":40,"5":25}', '{"add","sub","mul","div"}', '{"decimal","fraction"}', 'High cognitive-load arithmetic focus');
+
+-- 6. User reminders table (daily push notification preferences)
+create table public.user_reminders (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  enabled boolean not null default false,
+  reminder_time time not null default '09:00',
+  timezone text not null default 'UTC',
+  last_sent_at timestamptz,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+alter table public.user_reminders enable row level security;
+
+create policy "Users can read own reminders"
+  on public.user_reminders for select to authenticated
+  using (user_id = auth.uid());
+
+create policy "Users can insert own reminders"
+  on public.user_reminders for insert to authenticated
+  with check (user_id = auth.uid());
+
+create policy "Users can update own reminders"
+  on public.user_reminders for update to authenticated
+  using (user_id = auth.uid());
+
+-- 7. Push subscriptions table (one per device per user)
+create table public.push_subscriptions (
+  id bigint generated always as identity primary key,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  endpoint text not null,
+  subscription_json jsonb not null,
+  active boolean not null default true,
+  created_at timestamptz default now(),
+  constraint uq_push_endpoint unique (user_id, endpoint)
+);
+
+create index idx_push_sub_user on public.push_subscriptions(user_id);
+create index idx_push_sub_active on public.push_subscriptions(active) where active = true;
+
+alter table public.push_subscriptions enable row level security;
+
+create policy "Users can read own push subs"
+  on public.push_subscriptions for select to authenticated
+  using (user_id = auth.uid());
+
+create policy "Users can insert own push subs"
+  on public.push_subscriptions for insert to authenticated
+  with check (user_id = auth.uid());
+
+create policy "Users can update own push subs"
+  on public.push_subscriptions for update to authenticated
+  using (user_id = auth.uid());
+
+create policy "Users can delete own push subs"
+  on public.push_subscriptions for delete to authenticated
+  using (user_id = auth.uid());

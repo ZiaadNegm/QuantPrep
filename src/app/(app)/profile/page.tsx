@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import ReminderSettings from '@/components/reminder-settings'
 
 export default function ProfilePage() {
   const [displayName, setDisplayName] = useState('')
@@ -120,6 +121,8 @@ export default function ProfilePage() {
           </p>
         )}
       </form>
+
+      <ReminderSettings timezone={timezone} />
 
       <hr className="my-8" />
 

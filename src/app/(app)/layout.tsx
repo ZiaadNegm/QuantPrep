@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import InstallBanner from "@/components/install-banner";
 
 const navLinks = [
   { href: "/dashboard", label: "Dashboard" },
@@ -43,6 +44,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           Sign out
         </button>
       </nav>
+      <InstallBanner />
       <main className="flex-1 p-6">{children}</main>
     </div>
   );

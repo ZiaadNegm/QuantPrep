@@ -102,18 +102,11 @@ export default function MentalMathSetupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       <Header isLoggedIn={true} />
 
-      <main className="mx-auto max-w-3xl px-6 pb-16 pt-20">
-        {/* Breadcrumb */}
-        <nav className="mb-8 flex items-center gap-2 text-sm text-foreground-muted">
-          <Link href="/" className="transition-colors hover:text-foreground">
-            Dashboard
-          </Link>
-          <span>/</span>
-          <span className="text-foreground">Mental Math</span>
-        </nav>
+      <main className="flex flex-1 flex-col items-center justify-center px-6 py-20">
+        <div className="w-full max-w-3xl">
 
         {/* Mode Toggle */}
         <div className="mb-10 flex justify-center">
@@ -391,6 +384,7 @@ export default function MentalMathSetupPage() {
           >
             Start Session
           </button>
+        </div>
         </div>
       </main>
     </div>

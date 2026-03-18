@@ -129,10 +129,11 @@ export default function StatisticsPage() {
       : mockBreakdownByType;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       <Header isLoggedIn={true} />
 
-      <main className="mx-auto max-w-5xl px-6 pb-16 pt-20">
+      <main className="flex flex-1 flex-col px-6 py-20">
+        <div className="mx-auto w-full max-w-5xl">
         {/* Page Header */}
         <div className="mb-8 flex items-center justify-between">
           <h1 className="text-lg font-medium text-foreground-bright">
@@ -410,6 +411,7 @@ export default function StatisticsPage() {
             </Link>
           </div>
         )}
+        </div>
       </main>
     </div>
   );

@@ -134,10 +134,11 @@ export default function MistakesPage() {
   const hasData = mockMistakes.length > 0;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       <Header isLoggedIn={true} />
 
-      <main className="mx-auto max-w-4xl px-6 pb-16 pt-20">
+      <main className="flex flex-1 flex-col px-6 py-20">
+        <div className="mx-auto w-full max-w-4xl">
         {/* Page Header */}
         <div className="mb-8 flex items-center justify-between">
           <h1 className="text-lg font-medium text-foreground-bright">
@@ -289,6 +290,7 @@ export default function MistakesPage() {
             </Link>
           </div>
         )}
+        </div>
       </main>
     </div>
   );

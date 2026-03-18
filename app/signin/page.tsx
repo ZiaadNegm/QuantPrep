@@ -3,11 +3,11 @@ import { Header } from "@/components/header";
 
 export default function SignInPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       <Header isLoggedIn={false} minimal />
 
-      <main className="mx-auto flex min-h-screen max-w-sm flex-col items-center justify-center px-6">
-        <div className="w-full">
+      <main className="flex flex-1 flex-col items-center justify-center px-6">
+        <div className="w-full max-w-sm">
           <h1 className="mb-8 text-center text-lg font-medium text-foreground-bright">
             Sign in to Quant Prep
           </h1>

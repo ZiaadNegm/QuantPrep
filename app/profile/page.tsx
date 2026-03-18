@@ -5,10 +5,11 @@ import { StatBlock } from "@/components/stat-block";
 
 export default function ProfilePage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       <Header isLoggedIn={true} />
 
-      <main className="mx-auto max-w-2xl px-6 pb-16 pt-20">
+      <main className="flex flex-1 flex-col items-center justify-center px-6 py-20">
+        <div className="w-full max-w-2xl">
         {/* Page Header */}
         <h1 className="mb-8 text-lg font-medium text-foreground-bright">
           Profile
@@ -109,6 +110,7 @@ export default function ProfilePage() {
             Delete account
           </button>
         </section>
+        </div>
       </main>
     </div>
   );

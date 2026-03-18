@@ -139,17 +139,14 @@ function isReminderDue(
   try {
     // Get current time in user's timezone
     const userNow = new Date(now.toLocaleString('en-US', { timeZone: reminder.timezone }));
-    const userHour = userNow.getHours();
-    const userMinute = userNow.getMinutes();
 
     // Parse reminder time (HH:MM or HH:MM:SS)
-    const [reminderHour, reminderMinute] = reminder.reminder_time.split(':').map(Number);
+    const [reminderHour] = reminder.reminder_time.split(':').map(Number);
 
-    // Check if current time is within the 15-minute window after reminder time
-    const currentMinutes = userHour * 60 + userMinute;
-    const reminderMinutes = reminderHour * 60 + reminderMinute;
-
-    if (currentMinutes < reminderMinutes || currentMinutes >= reminderMinutes + 15) {
+    // Vercel Hobby plan only allows once-daily cron (runs at 9 AM UTC).
+    // Send to any user whose reminder hour has already passed today
+    // but who hasn't been sent a notification today yet.
+    if (userNow.getHours() < reminderHour) {
       return false;
     }
 

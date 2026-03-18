@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -58,47 +58,70 @@ export async function GET() {
       recentPercentWithinTarget = totalPwt / recentSessions.length;
     }
 
-    // Accuracy over time (last 30 days, grouped by date)
+    // Accuracy over time (last 30 days)
+    const granularity = new URL(request.url).searchParams.get('granularity') ?? 'day';
+
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     const last30Sessions = sessions?.filter(
       (s) => s.completed_at && new Date(s.completed_at) >= thirtyDaysAgo
     ) ?? [];
 
-    const accuracyByDate = new Map<string, { total: number; count: number }>();
-    const responseTimeByDate = new Map<string, { total: number; count: number }>();
+    let accuracyOverTime: { date: string; accuracy: number }[];
+    let responseTimeOverTime: { date: string; avgResponseTimeMs: number }[];
 
-    for (const s of last30Sessions) {
-      const date = new Date(s.completed_at).toISOString().split('T')[0];
+    if (granularity === 'session') {
+      // Per-session data points
+      accuracyOverTime = last30Sessions
+        .filter((s) => s.accuracy != null)
+        .map((s) => ({
+          date: new Date(s.completed_at).toISOString(),
+          accuracy: Math.round(s.accuracy * 1000) / 10,
+        }));
 
-      if (s.accuracy != null) {
-        const entry = accuracyByDate.get(date) ?? { total: 0, count: 0 };
-        entry.total += s.accuracy;
-        entry.count += 1;
-        accuracyByDate.set(date, entry);
+      responseTimeOverTime = last30Sessions
+        .filter((s) => s.avg_response_time_ms != null)
+        .map((s) => ({
+          date: new Date(s.completed_at).toISOString(),
+          avgResponseTimeMs: Math.round(s.avg_response_time_ms),
+        }));
+    } else {
+      // Grouped by date (default)
+      const accuracyByDate = new Map<string, { total: number; count: number }>();
+      const responseTimeByDate = new Map<string, { total: number; count: number }>();
+
+      for (const s of last30Sessions) {
+        const date = new Date(s.completed_at).toISOString().split('T')[0];
+
+        if (s.accuracy != null) {
+          const entry = accuracyByDate.get(date) ?? { total: 0, count: 0 };
+          entry.total += s.accuracy;
+          entry.count += 1;
+          accuracyByDate.set(date, entry);
+        }
+
+        if (s.avg_response_time_ms != null) {
+          const entry = responseTimeByDate.get(date) ?? { total: 0, count: 0 };
+          entry.total += s.avg_response_time_ms;
+          entry.count += 1;
+          responseTimeByDate.set(date, entry);
+        }
       }
 
-      if (s.avg_response_time_ms != null) {
-        const entry = responseTimeByDate.get(date) ?? { total: 0, count: 0 };
-        entry.total += s.avg_response_time_ms;
-        entry.count += 1;
-        responseTimeByDate.set(date, entry);
-      }
+      accuracyOverTime = Array.from(accuracyByDate.entries())
+        .map(([date, { total, count }]) => ({
+          date,
+          accuracy: Math.round((total / count) * 1000) / 10,
+        }))
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      responseTimeOverTime = Array.from(responseTimeByDate.entries())
+        .map(([date, { total, count }]) => ({
+          date,
+          avgResponseTimeMs: Math.round(total / count),
+        }))
+        .sort((a, b) => a.date.localeCompare(b.date));
     }
-
-    const accuracyOverTime = Array.from(accuracyByDate.entries())
-      .map(([date, { total, count }]) => ({
-        date,
-        accuracy: Math.round((total / count) * 1000) / 10,
-      }))
-      .sort((a, b) => a.date.localeCompare(b.date));
-
-    const responseTimeOverTime = Array.from(responseTimeByDate.entries())
-      .map(([date, { total, count }]) => ({
-        date,
-        avgResponseTimeMs: Math.round(total / count),
-      }))
-      .sort((a, b) => a.date.localeCompare(b.date));
 
     return NextResponse.json({
       totalSessions,

@@ -4,43 +4,24 @@ import Link from "next/link";
 
 export default function MentalMathPage() {
   return (
-    <div className="mx-auto max-w-2xl">
-      <h1 className="mb-2 text-2xl font-bold">Mental Math</h1>
-      <p className="mb-8 text-gray-600">
-        Choose a mode to start practicing mental arithmetic.
-      </p>
-
-      <div className="grid gap-6 sm:grid-cols-2">
+    <div className="flex flex-1 flex-col items-center justify-center px-8">
+      <div className="grid w-full max-w-3xl grid-cols-2 gap-8">
         <Link
           href="/mental-math/practice"
-          className="block rounded-lg border-2 border-gray-200 p-6 transition hover:border-blue-400 hover:shadow-md"
+          className="flex aspect-[5/3] items-center justify-center rounded-lg border-2 border-dashed border-foreground-muted bg-background-card transition-all duration-200 hover:scale-[1.02] hover:bg-background-hover"
         >
-          <h2 className="mb-2 text-xl font-semibold">Practice Mode</h2>
-          <p className="mb-4 text-sm text-gray-600">
-            Flexible training with customizable settings. Choose your levels,
-            operations, and timing.
-          </p>
-          <p className="text-xs text-gray-500">
-            Scoring: <span className="font-medium">+1</span> correct,{" "}
-            <span className="font-medium">0</span> wrong,{" "}
-            <span className="font-medium">0</span> skipped
-          </p>
+          <span className="font-mono text-3xl font-bold text-foreground-bright sm:text-4xl">
+            Practice
+          </span>
         </Link>
 
         <Link
           href="/mental-math/test"
-          className="block rounded-lg border-2 border-gray-200 p-6 transition hover:border-blue-400 hover:shadow-md"
+          className="flex aspect-[5/3] items-center justify-center rounded-lg border-2 border-dashed border-foreground-muted bg-background-card transition-all duration-200 hover:scale-[1.02] hover:bg-background-hover"
         >
-          <h2 className="mb-2 text-xl font-semibold">Test Mode</h2>
-          <p className="mb-4 text-sm text-gray-600">
-            Timed tests simulating real quant interviews. Fixed presets with
-            penalties for wrong answers.
-          </p>
-          <p className="text-xs text-gray-500">
-            Scoring: <span className="font-medium">+1</span> correct,{" "}
-            <span className="font-medium text-red-600">-1</span> wrong,{" "}
-            <span className="font-medium">0</span> skipped
-          </p>
+          <span className="font-mono text-3xl font-bold text-foreground-bright sm:text-4xl">
+            Test
+          </span>
         </Link>
       </div>
     </div>

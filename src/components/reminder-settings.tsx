@@ -121,53 +121,66 @@ export default function ReminderSettings({ timezone }: Props) {
   }
 
   if (loading) return null
-  if (permissionState === 'unsupported') return null
+
+  const unsupported = permissionState === 'unsupported'
 
   return (
     <div className="space-y-3 pt-6 border-t">
       <h2 className="text-sm font-medium text-gray-700">Daily Reminder</h2>
 
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-gray-600">
-          Send a daily practice reminder
-        </span>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={enabled}
-          onClick={handleToggle}
-          disabled={saving}
-          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-            enabled ? 'bg-blue-600' : 'bg-gray-300'
-          } ${saving ? 'opacity-50' : ''}`}
-        >
-          <span
-            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-              enabled ? 'translate-x-6' : 'translate-x-1'
-            }`}
-          />
-        </button>
-      </div>
-
-      {enabled && (
-        <div>
-          <label className="block text-sm text-gray-600 mb-1">Reminder time</label>
-          <input
-            type="time"
-            value={reminderTime}
-            onChange={(e) => handleTimeChange(e.target.value)}
-            className="px-3 py-2 border rounded text-sm"
-          />
+      {unsupported ? (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+          <p className="text-sm font-medium text-amber-900">Install app to enable reminders</p>
+          <p className="text-xs text-amber-700 mt-1">
+            On iPhone: tap the Share button, then &ldquo;Add to Home Screen&rdquo;.
+            On Android/Desktop: look for the install option in your browser menu.
+          </p>
         </div>
-      )}
+      ) : (
+        <>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-600">
+              Send a daily practice reminder
+            </span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={enabled}
+              onClick={handleToggle}
+              disabled={saving}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                enabled ? 'bg-blue-600' : 'bg-gray-300'
+              } ${saving ? 'opacity-50' : ''}`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  enabled ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
 
-      {permissionState === 'denied' && (
-        <p className="text-xs text-red-600">
-          Notifications are blocked. Open your browser settings to re-enable them.
-        </p>
-      )}
+          {enabled && (
+            <div>
+              <label className="block text-sm text-gray-600 mb-1">Reminder time</label>
+              <input
+                type="time"
+                value={reminderTime}
+                onChange={(e) => handleTimeChange(e.target.value)}
+                className="px-3 py-2 border rounded text-sm"
+              />
+            </div>
+          )}
 
-      {error && <p className="text-xs text-red-600">{error}</p>}
+          {permissionState === 'denied' && (
+            <p className="text-xs text-red-600">
+              Notifications are blocked. Open your browser settings to re-enable them.
+            </p>
+          )}
+
+          {error && <p className="text-xs text-red-600">{error}</p>}
+        </>
+      )}
     </div>
   )
 }

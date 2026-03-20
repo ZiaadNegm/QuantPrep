@@ -18,17 +18,17 @@ export async function subscribeToPush(
     return null;
   }
 
-  try {
-    const keyBytes = urlBase64ToUint8Array(vapidPublicKey);
-    const subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: keyBytes.buffer.slice(0) as ArrayBuffer,
-    });
-    return subscription;
-  } catch (err) {
-    console.error('Push subscription failed:', err);
-    return null;
-  }
+  const keyBytes = urlBase64ToUint8Array(vapidPublicKey);
+  // Create a correctly-sized ArrayBuffer from the Uint8Array.
+  // Using new Uint8Array(keyBytes).buffer avoids the iOS Safari issue where
+  // .buffer on the original array can reference a larger backing store.
+  const keyBuffer = new ArrayBuffer(keyBytes.length);
+  new Uint8Array(keyBuffer).set(keyBytes);
+  const subscription = await registration.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: keyBuffer,
+  });
+  return subscription;
 }
 
 export type PermissionState = 'granted' | 'denied' | 'default' | 'unsupported';

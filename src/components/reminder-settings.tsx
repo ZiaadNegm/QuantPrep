@@ -82,9 +82,13 @@ export default function ReminderSettings({ timezone }: Props) {
             return
           }
 
-          const subscription = await subscribeToPush(registration)
-          if (!subscription) {
-            setError('Push subscription failed')
+          let subscription: PushSubscription
+          try {
+            const sub = await subscribeToPush(registration)
+            if (!sub) { setError('Push subscription returned null'); return }
+            subscription = sub
+          } catch (subErr) {
+            setError(`Push subscription failed: ${subErr instanceof Error ? subErr.message : subErr}`)
             return
           }
 

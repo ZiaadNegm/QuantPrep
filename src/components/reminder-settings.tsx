@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { registerServiceWorker } from '@/lib/push/register-sw'
-import { subscribeToPush, getPermissionState, type PermissionState } from '@/lib/push/subscribe'
+import { subscribeToPush, getPermissionState, type PermissionState, type PushDiagnostics } from '@/lib/push/subscribe'
 
 interface Props {
   timezone: string
@@ -15,6 +15,7 @@ export default function ReminderSettings({ timezone }: Props) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [diagnostics, setDiagnostics] = useState<PushDiagnostics | null>(null)
 
   useEffect(() => {
     setPermissionState(getPermissionState())
@@ -84,11 +85,18 @@ export default function ReminderSettings({ timezone }: Props) {
 
           let subscription: PushSubscription
           try {
-            subscription = await subscribeToPush(registration)
-          } catch (subErr) {
-            const msg = subErr instanceof Error ? subErr.message : String(subErr)
-            const keyLen = (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? '').length
-            setError(`Push failed (key len=${keyLen}): ${msg}`)
+            const result = await subscribeToPush(registration)
+            subscription = result.subscription
+            setDiagnostics(result.diagnostics)
+          } catch (subErr: unknown) {
+            const diag = (subErr as { diagnostics?: PushDiagnostics })?.diagnostics
+            if (diag) {
+              setDiagnostics(diag)
+              setError('All subscribe attempts failed — see diagnostics below')
+            } else {
+              const msg = subErr instanceof Error ? subErr.message : String(subErr)
+              setError(`Push failed: ${msg}`)
+            }
             return
           }
 
@@ -183,6 +191,26 @@ export default function ReminderSettings({ timezone }: Props) {
           )}
 
           {error && <p className="text-xs text-red-600">{error}</p>}
+
+          {diagnostics && (
+            <div className="mt-3 rounded border border-gray-300 bg-gray-50 p-2 text-[10px] font-mono leading-relaxed break-all">
+              <p className="font-bold mb-1">Push Diagnostics:</p>
+              <p>rawLen: {diagnostics.rawKeyLength}</p>
+              <p>raw: {diagnostics.rawKeyPreview}</p>
+              <p>trimmed: {diagnostics.trimmedKey}</p>
+              <p>decoded: {diagnostics.decodedByteLength} bytes</p>
+              <p>first: {diagnostics.firstByte}</p>
+              <p>last4: {diagnostics.last4Bytes}</p>
+              <p>hex8: {diagnostics.hexFirst8}</p>
+              <p>sw: {diagnostics.swState}</p>
+              <p className="font-bold mt-1">Attempts:</p>
+              {diagnostics.attempts.map((a, i) => (
+                <p key={i} className={a.result === 'SUCCESS' ? 'text-green-700' : 'text-red-700'}>
+                  {a.method}: {a.result}
+                </p>
+              ))}
+            </div>
+          )}
         </>
       )}
     </div>

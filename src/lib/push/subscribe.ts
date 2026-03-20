@@ -1,33 +1,44 @@
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const rawData = atob(base64);
+  const rawData = window.atob(base64);
   const outputArray = new Uint8Array(rawData.length);
-  for (let i = 0; i < rawData.length; i++) {
+  for (let i = 0; i < rawData.length; ++i) {
     outputArray[i] = rawData.charCodeAt(i);
   }
   return outputArray;
 }
 
+function isIOS(): boolean {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent);
+}
+
 export async function subscribeToPush(
   registration: ServiceWorkerRegistration
 ): Promise<PushSubscription> {
-  const raw = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-  if (!raw) {
+  const vapidKey = (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? '').trim();
+  if (!vapidKey) {
     throw new Error('VAPID key missing');
   }
 
-  const key = raw.trim().replace(/^["']|["']$/g, '');
-  const keyBytes = urlBase64ToUint8Array(key);
+  // iOS Safari prefers DOMString; other browsers use Uint8Array
+  if (isIOS()) {
+    return registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: vapidKey,
+    });
+  }
 
-  const subscription = await registration.pushManager.subscribe({
+  const keyBytes = urlBase64ToUint8Array(vapidKey);
+  const keyBuffer = keyBytes.buffer.slice(
+    keyBytes.byteOffset,
+    keyBytes.byteOffset + keyBytes.byteLength
+  ) as ArrayBuffer;
+
+  return registration.pushManager.subscribe({
     userVisibleOnly: true,
-    applicationServerKey: keyBytes.buffer.slice(
-      keyBytes.byteOffset,
-      keyBytes.byteOffset + keyBytes.byteLength
-    ) as ArrayBuffer,
+    applicationServerKey: keyBuffer,
   });
-  return subscription;
 }
 
 export type PermissionState = 'granted' | 'denied' | 'default' | 'unsupported';

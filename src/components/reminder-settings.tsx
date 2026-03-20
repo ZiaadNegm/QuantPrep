@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { registerServiceWorker } from '@/lib/push/register-sw'
 import { subscribeToPush, getPermissionState, type PermissionState } from '@/lib/push/subscribe'
 
 interface Props {
@@ -16,8 +15,13 @@ export default function ReminderSettings({ timezone }: Props) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
+  // Register SW eagerly on mount so it's already active by click time
   useEffect(() => {
     setPermissionState(getPermissionState())
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {})
+    }
   }, [])
 
   useEffect(() => {
@@ -60,51 +64,40 @@ export default function ReminderSettings({ timezone }: Props) {
   async function handleToggle() {
     if (!enabled) {
       // Turning ON — need permission + subscription
+      // Keep this handler as short as possible for iOS gesture chain
       if (permissionState === 'denied') {
         setError('Notifications are blocked. Please enable them in your browser settings.')
         return
       }
 
-      if (permissionState === 'default' || permissionState === 'granted') {
-        try {
-          const permission = await Notification.requestPermission()
-          setPermissionState(permission as PermissionState)
+      try {
+        const permission = await Notification.requestPermission()
+        setPermissionState(permission as PermissionState)
 
-          if (permission !== 'granted') {
-            setError('Notification permission was not granted')
-            return
-          }
-
-          // Register SW and subscribe
-          const registration = await registerServiceWorker()
-          if (!registration) {
-            setError('Service worker registration failed. Make sure the app is installed as a PWA.')
-            return
-          }
-
-          let subscription: PushSubscription
-          try {
-            subscription = await subscribeToPush(registration)
-          } catch (subErr) {
-            const msg = subErr instanceof Error ? subErr.message : String(subErr)
-            setError(`Push subscription failed: ${msg}`)
-            return
-          }
-
-          // Save subscription to server
-          const res = await fetch('/api/push-subscription', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ subscription: subscription.toJSON() }),
-          })
-          if (!res.ok) {
-            setError('Failed to save push subscription')
-            return
-          }
-        } catch {
-          setError('Failed to set up notifications')
+        if (permission !== 'granted') {
+          setError('Notification permission was not granted')
           return
         }
+
+        // Get the already-registered SW — minimal async for iOS gesture chain
+        const reg = await navigator.serviceWorker.ready
+
+        const subscription = await subscribeToPush(reg)
+
+        // Save subscription to server
+        const res = await fetch('/api/push-subscription', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subscription: subscription.toJSON() }),
+        })
+        if (!res.ok) {
+          setError('Failed to save push subscription')
+          return
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        setError(`Push subscription failed: ${msg}`)
+        return
       }
 
       setEnabled(true)

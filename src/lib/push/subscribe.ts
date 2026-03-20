@@ -45,19 +45,20 @@ export async function subscribeToPush(
     await new Promise<void>((resolve) => {
       const sw = registration.installing ?? registration.waiting;
       if (!sw) { resolve(); return; }
-      sw.addEventListener('statechange', () => {
-        if (sw.state === 'activated') resolve();
-      });
-      if (sw.state === 'activated') resolve();
+      const handler = () => {
+        if ((sw as ServiceWorker).state === 'activated') resolve();
+      };
+      sw.addEventListener('statechange', handler);
+      if ((sw as ServiceWorker).state === 'activated') resolve();
     });
-    diagnostics.swState = 'waited->' + (registration.active?.state ?? 'still-none');
+    diagnostics.swState = 'waited->' + ((registration.active as ServiceWorker | null)?.state ?? 'still-none');
   }
 
   // Attempt 1: Uint8Array directly
   try {
     const sub = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: keyBytes,
+      applicationServerKey: keyBytes as unknown as BufferSource,
     });
     diagnostics.attempts.push({ method: 'Uint8Array', result: 'SUCCESS' });
     return { subscription: sub, diagnostics };
@@ -83,7 +84,7 @@ export async function subscribeToPush(
   try {
     const sub = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: keyBytes.buffer.slice(keyBytes.byteOffset, keyBytes.byteOffset + keyBytes.byteLength),
+      applicationServerKey: keyBytes.buffer.slice(keyBytes.byteOffset, keyBytes.byteOffset + keyBytes.byteLength) as ArrayBuffer,
     });
     diagnostics.attempts.push({ method: 'buffer.slice', result: 'SUCCESS' });
     return { subscription: sub, diagnostics };

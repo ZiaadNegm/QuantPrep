@@ -84,11 +84,11 @@ export default function ReminderSettings({ timezone }: Props) {
 
           let subscription: PushSubscription
           try {
-            const sub = await subscribeToPush(registration)
-            if (!sub) { setError('Push subscription returned null'); return }
-            subscription = sub
+            subscription = await subscribeToPush(registration)
           } catch (subErr) {
-            setError(`Push subscription failed: ${subErr instanceof Error ? subErr.message : subErr}`)
+            const msg = subErr instanceof Error ? subErr.message : String(subErr)
+            const keyLen = (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? '').length
+            setError(`Push failed (key len=${keyLen}): ${msg}`)
             return
           }
 

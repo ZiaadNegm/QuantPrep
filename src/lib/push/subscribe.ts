@@ -1,18 +1,25 @@
 export async function subscribeToPush(
   registration: ServiceWorkerRegistration
-): Promise<PushSubscription | null> {
-  const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-  if (!vapidPublicKey) {
-    console.error('VAPID public key not configured');
-    return null;
+): Promise<PushSubscription> {
+  const raw = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  if (!raw) {
+    throw new Error('VAPID key missing');
   }
 
-  // Pass the base64url-encoded VAPID key as a string directly.
-  // The Web Push API accepts both BufferSource and DOMString.
-  // Using the string form avoids ArrayBuffer compatibility issues on iOS Safari.
+  // Sanitize: Next.js NEXT_PUBLIC_ inlining can bake in quotes or whitespace
+  const key = raw.trim().replace(/^["']|["']$/g, '');
+
+  // Diagnostic — remove after confirming it works on iOS
+  console.log('[push] VAPID key:', JSON.stringify(key), 'len:', key.length);
+
+  if (key.length !== 87) {
+    throw new Error(`VAPID key bad length: ${key.length} (expected 87). First 10: "${key.slice(0, 10)}"`);
+  }
+
+  // Pass as raw base64url string — most compatible with iOS Safari
   const subscription = await registration.pushManager.subscribe({
     userVisibleOnly: true,
-    applicationServerKey: vapidPublicKey,
+    applicationServerKey: key,
   });
   return subscription;
 }

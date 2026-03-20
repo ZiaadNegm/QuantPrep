@@ -1,3 +1,14 @@
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; i++) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
 export async function subscribeToPush(
   registration: ServiceWorkerRegistration
 ): Promise<PushSubscription> {
@@ -6,20 +17,27 @@ export async function subscribeToPush(
     throw new Error('VAPID key missing');
   }
 
-  // Sanitize: Next.js NEXT_PUBLIC_ inlining can bake in quotes or whitespace
   const key = raw.trim().replace(/^["']|["']$/g, '');
+  const keyBytes = urlBase64ToUint8Array(key);
 
-  // Diagnostic — remove after confirming it works on iOS
-  console.log('[push] VAPID key:', JSON.stringify(key), 'len:', key.length);
+  // Validate through the browser's own crypto stack — this ensures
+  // the key is a valid P-256 point according to this engine's implementation.
+  // Copy into a fresh ArrayBuffer to satisfy TypeScript and iOS Safari
+  const buf = new ArrayBuffer(keyBytes.length);
+  new Uint8Array(buf).set(keyBytes);
 
-  if (key.length !== 87) {
-    throw new Error(`VAPID key bad length: ${key.length} (expected 87). First 10: "${key.slice(0, 10)}"`);
-  }
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    buf,
+    { name: 'ECDH', namedCurve: 'P-256' },
+    true,
+    []
+  );
+  const validatedBuffer = await crypto.subtle.exportKey('raw', cryptoKey);
 
-  // Pass as raw base64url string — most compatible with iOS Safari
   const subscription = await registration.pushManager.subscribe({
     userVisibleOnly: true,
-    applicationServerKey: key,
+    applicationServerKey: validatedBuffer,
   });
   return subscription;
 }

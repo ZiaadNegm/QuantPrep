@@ -307,23 +307,24 @@ export default function SessionPage() {
   }, [state.currentIndex, state.status, state.questions, sessionId]);
 
   // Auto-submit when input length matches expected answer length
-  useEffect(() => {
-    if (state.status !== "active") return;
-    const currentQuestion = state.questions[state.currentIndex];
-    if (!currentQuestion || currentQuestion.answerLength <= 0) return;
-    const trimmed = state.inputValue.trim();
-    if (trimmed.length > 0 && trimmed.length === currentQuestion.answerLength) {
-      // Small delay so the user sees their last keystroke before advancing
-      const timeout = setTimeout(() => {
-        const responseTimeMs = Date.now() - questionStartRef.current;
-        dispatch({
-          type: "SUBMIT_ANSWER",
-          payload: { userAnswer: trimmed, responseTimeMs },
-        });
-      }, 150);
-      return () => clearTimeout(timeout);
-    }
-  }, [state.inputValue, state.status, state.currentIndex, state.questions]);
+  // NOTE: Disabled — users found it annoying. Uncomment to re-enable.
+  // useEffect(() => {
+  //   if (state.status !== "active") return;
+  //   const currentQuestion = state.questions[state.currentIndex];
+  //   if (!currentQuestion || currentQuestion.answerLength <= 0) return;
+  //   const trimmed = state.inputValue.trim();
+  //   if (trimmed.length > 0 && trimmed.length === currentQuestion.answerLength) {
+  //     // Small delay so the user sees their last keystroke before advancing
+  //     const timeout = setTimeout(() => {
+  //       const responseTimeMs = Date.now() - questionStartRef.current;
+  //       dispatch({
+  //         type: "SUBMIT_ANSWER",
+  //         payload: { userAnswer: trimmed, responseTimeMs },
+  //       });
+  //     }, 150);
+  //     return () => clearTimeout(timeout);
+  //   }
+  // }, [state.inputValue, state.status, state.currentIndex, state.questions]);
 
   const handleSubmit = useCallback(() => {
     if (state.status !== "active" || !state.inputValue.trim()) return;

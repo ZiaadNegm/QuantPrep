@@ -65,7 +65,7 @@ export default function ProfilePage() {
   }
 
   if (loading) {
-    return <div className="p-8 text-center text-foreground-muted">Loading...</div>
+    return <div className="p-8 text-center text-[#737373]">Loading...</div>
   }
 
   const initials = displayName
@@ -75,54 +75,54 @@ export default function ProfilePage() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-6 py-8">
       <div className="w-full max-w-2xl space-y-8">
-        <h1 className="text-lg font-medium text-foreground-bright">Profile</h1>
+        <h1 className="text-3xl font-semibold text-white text-center">Profile</h1>
 
         {/* User info section */}
-        <div className="rounded-lg border border-border-subtle bg-background-elevated p-6">
-          <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-background-card font-mono text-xl text-foreground-muted">
+        <div className="rounded-xl border border-[#333] bg-[#1a1a1a] p-6">
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#222] text-xl text-[#a3a3a3]">
               {initials}
             </div>
-            <div>
-              <p className="font-medium text-foreground-bright">
+            <div className="text-center">
+              <p className="font-medium text-white">
                 {displayName || 'No display name'}
               </p>
-              <p className="text-sm text-foreground-muted">{email}</p>
+              <p className="text-sm text-[#737373]">{email}</p>
             </div>
           </div>
         </div>
 
         {/* Settings section */}
-        <form onSubmit={handleSave} className="rounded-lg border border-border-subtle bg-background-elevated p-6 space-y-5">
-          <h2 className="text-xs uppercase tracking-wider text-foreground-muted">Settings</h2>
+        <form onSubmit={handleSave} className="rounded-xl border border-[#333] bg-[#1a1a1a] p-6 space-y-5">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-[#a3a3a3]">Settings</h2>
 
           <div>
-            <label className="mb-1 block text-sm text-foreground-muted">Email</label>
+            <label className="mb-1 block text-sm text-[#737373]">Email</label>
             <input
               type="email"
               value={email}
               disabled
-              className="w-full rounded-md border border-border bg-background-card px-4 py-2.5 text-foreground-muted cursor-not-allowed outline-none"
+              className="w-full rounded-xl border border-[#333] bg-[#1a1a1a] px-4 py-2.5 text-[#737373] cursor-not-allowed outline-none"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm text-foreground-muted">Display Name</label>
+            <label className="mb-1 block text-sm text-[#737373]">Display Name</label>
             <input
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              className="w-full rounded-md border border-border bg-background-elevated px-4 py-2.5 text-foreground outline-none transition-colors focus:border-foreground-muted"
+              className="w-full rounded-xl border border-[#333] bg-[#171717] px-4 py-2.5 text-[#a3a3a3] outline-none transition-colors focus:border-[#a3a3a3]"
               placeholder="Your name"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm text-foreground-muted">Timezone</label>
+            <label className="mb-1 block text-sm text-[#737373]">Timezone</label>
             <select
               value={timezone}
               onChange={(e) => setTimezone(e.target.value)}
-              className="w-full rounded-md border border-border bg-background-elevated px-4 py-2.5 text-foreground outline-none transition-colors focus:border-foreground-muted"
+              className="w-full rounded-xl border border-[#333] bg-[#171717] px-4 py-2.5 text-[#a3a3a3] outline-none transition-colors focus:border-[#a3a3a3]"
             >
               {Intl.supportedValuesOf('timeZone').map((tz) => (
                 <option key={tz} value={tz}>{tz}</option>
@@ -133,7 +133,7 @@ export default function ProfilePage() {
           <button
             type="submit"
             disabled={saving}
-            className="w-full rounded-md border border-foreground-muted bg-background-card py-2.5 font-medium text-foreground-bright transition-all hover:bg-background-hover disabled:opacity-50"
+            className="w-full rounded-xl border border-[#a3a3a3] bg-[#1a1a1a] py-2.5 font-medium text-white transition-all hover:bg-[#222] disabled:opacity-50 cursor-pointer"
           >
             {saving ? 'Saving...' : 'Save Profile'}
           </button>
@@ -151,7 +151,7 @@ export default function ProfilePage() {
         <div className="mt-8 flex justify-between">
           <button
             onClick={handleSignOut}
-            className="text-sm text-foreground-muted transition-colors hover:text-foreground"
+            className="text-sm text-[#737373] transition-colors hover:text-white cursor-pointer"
           >
             Sign Out
           </button>

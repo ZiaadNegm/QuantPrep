@@ -6,19 +6,21 @@
 
   --radius-sm: 4px;
   --radius-md: 6px;
-  --radius-lg: 8px;
+  --radius-lg: 12px;
 
-  --color-background: #0d0d0d;
-  --color-background-elevated: #161616;
+  --color-background: #0a0a0a;
+  --color-background-elevated: #171717;
   --color-background-card: #1a1a1a;
   --color-background-hover: #222222;
 
   --color-foreground: #a3a3a3;
-  --color-foreground-muted: #666666;
+  --color-foreground-muted: #737373;
   --color-foreground-bright: #e5e5e5;
 
-  --color-border: #2a2a2a;
+  --color-border: #262626;
   --color-border-subtle: #1f1f1f;
+  --color-border-card: #333333;
+  --color-border-active: #a3a3a3;
 
   --color-accent: #525252;
   --color-accent-muted: #3d3d3d;
@@ -74,4 +76,65 @@ body {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
+}
+
+/* Living pixels animation */
+@keyframes pixel-flicker {
+  0%, 100% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.1); }
+}
+
+.animate-pixel-flicker {
+  animation: pixel-flicker 4s infinite ease-in-out;
+}
+
+/* Card background pattern */
+.card-bg-pattern {
+  background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Living pixels container */
+.living-pixels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.pixel {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.4);
+  border-radius: 1px;
+}
+
+.pixel:nth-child(1) { top: 20%; left: 15%; animation-delay: 0.2s; }
+.pixel:nth-child(2) { top: 45%; left: 80%; animation-delay: 1.5s; }
+.pixel:nth-child(3) { top: 75%; left: 30%; animation-delay: 0.8s; }
+.pixel:nth-child(4) { top: 15%; left: 65%; animation-delay: 2.1s; }
+.pixel:nth-child(5) { top: 60%; left: 10%; animation-delay: 0.5s; }
+.pixel:nth-child(6) { top: 85%; left: 70%; animation-delay: 3.2s; }
+.pixel:nth-child(7) { top: 35%; left: 40%; animation-delay: 1.2s; }
+.pixel:nth-child(8) { top: 10%; left: 90%; animation-delay: 2.5s; }
+.pixel:nth-child(9) { top: 65%; left: 55%; animation-delay: 0.1s; }
+.pixel:nth-child(10) { top: 25%; left: 25%; animation-delay: 1.8s; }
+.pixel:nth-child(11) { top: 80%; left: 15%; animation-delay: 0.7s; }
+.pixel:nth-child(12) { top: 50%; left: 45%; animation-delay: 2.9s; }
+
+/* Hover interactions for living pixels */
+.group:hover .pixel {
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
+
+/* Glow effect */
+.glow-effect {
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+}
+.group:hover.glow-effect {
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
 }

@@ -25,45 +25,46 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-border-subtle bg-background/95 backdrop-blur-sm">
-        <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-6">
-          <div className="flex items-center gap-8">
-            <Link
-              href="/dashboard"
-              className="font-mono text-sm font-medium tracking-tight text-foreground-muted transition-colors hover:text-foreground-bright"
-            >
-              quant prep
-            </Link>
-
-            <nav className="hidden items-center gap-6 md:flex">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "text-sm transition-colors",
-                    pathname === item.href || pathname.startsWith(item.href + "/")
-                      ? "text-foreground-bright"
-                      : "text-foreground-muted hover:text-foreground"
-                  )}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-
-          <button
-            onClick={handleSignOut}
-            className="text-sm text-foreground-muted transition-colors hover:text-foreground"
+      <header
+        className="border-b border-[#333] backdrop-blur-md sticky top-0 z-50 py-4 px-6 md:px-12 items-center grid grid-cols-3"
+        style={{ backgroundColor: "#1a1a1a" }}
+      >
+        <div className="flex items-center">
+          <Link
+            href="/dashboard"
+            className="text-xl font-semibold tracking-tight text-white"
           >
-            Sign out
-          </button>
+            Quant Prep
+          </Link>
         </div>
+
+        <nav className="hidden md:flex items-center justify-center space-x-6">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "text-sm font-medium transition-colors",
+                pathname === item.href || pathname.startsWith(item.href + "/")
+                  ? "text-white"
+                  : "text-[#a3a3a3] hover:text-white"
+              )}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+
+        <button
+          onClick={handleSignOut}
+          className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-[#404040] bg-transparent hover:bg-[#262626] text-[#d4d4d4] hover:text-white h-9 px-4 py-2 justify-self-end cursor-pointer"
+        >
+          Sign Out
+        </button>
       </header>
 
       <InstallBanner />
-      <main className="flex flex-1 flex-col pt-12">{children}</main>
+      <main className="flex flex-1 flex-col">{children}</main>
     </div>
   );
 }

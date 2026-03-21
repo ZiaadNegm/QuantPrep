@@ -44,52 +44,47 @@ export default function DashboardPage() {
   const hasData = stats && stats.totalSessions > 0;
 
   return (
-    <div className="flex flex-1 flex-col items-center px-8 pt-4 pb-8">
-      {/* Module Matrix — Full viewport immersive display */}
-      <section className="flex w-full max-w-7xl flex-col items-center justify-center">
-        <div className="grid w-full grid-cols-3 gap-5">
-          {modules.map((module, index) => (
-            <ModuleTile
-              key={index}
-              title={module.title}
-              href={module.href}
-              isActive={module.isActive}
-              isLocked={module.isLocked}
-            />
-          ))}
-        </div>
+    <main className="flex-1 flex flex-col items-center justify-center p-6 md:p-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl w-full mb-16">
+        {modules.map((module, index) => (
+          <ModuleTile
+            key={index}
+            title={module.title}
+            href={module.href}
+            isActive={module.isActive}
+            isLocked={module.isLocked}
+          />
+        ))}
+      </div>
 
-        {/* Progress Context */}
-        {!loading && (
-          <div className="mt-12 w-full border-t border-border-subtle pt-8">
-            {hasData ? (
-              <div className="flex justify-between">
-                <StatBlock
-                  label="Streak"
-                  value={stats.currentStreak}
-                  subtext="days"
-                />
-                <StatBlock
-                  label="Accuracy"
-                  value={`${stats.recentSnapshot.avgAccuracy}%`}
-                  subtext="last 7 days"
-                />
-                <StatBlock
-                  label="Avg. Time"
-                  value={`${(stats.recentSnapshot.avgResponseTimeMs / 1000).toFixed(1)}s`}
-                  subtext="last 7 days"
-                />
-              </div>
-            ) : (
-              <div className="text-center">
-                <p className="text-sm text-foreground-muted">
-                  Complete a session to start tracking progress
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-      </section>
-    </div>
+      {!loading && hasData && (
+        <div className="flex flex-wrap justify-center items-end gap-12 max-w-3xl w-full text-center">
+          <StatBlock
+            label="Streak"
+            value={stats.currentStreak}
+            subtext="days"
+          />
+          <StatBlock
+            label="Accuracy"
+            value={`${stats.recentSnapshot.avgAccuracy}%`}
+            subtext="last 7 days"
+            progressPercent={stats.recentSnapshot.avgAccuracy}
+          />
+          <StatBlock
+            label="Avg. Time"
+            value={`${(stats.recentSnapshot.avgResponseTimeMs / 1000).toFixed(1)}s`}
+            subtext="last 7 days"
+          />
+        </div>
+      )}
+
+      {!loading && !hasData && (
+        <div className="text-center">
+          <p className="text-sm text-[#737373]">
+            Complete a session to start tracking progress
+          </p>
+        </div>
+      )}
+    </main>
   );
 }

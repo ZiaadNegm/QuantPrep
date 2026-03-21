@@ -13,7 +13,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { cn } from "@/lib/utils";
-import { StatBlock } from "@/components/stat-block";
 
 interface Stats {
   totalSessions: number;
@@ -82,12 +81,12 @@ export default function StatisticsPage() {
     return (
       <div className="px-6 pt-8 pb-8">
         <div className="mx-auto w-full max-w-5xl">
-          <h1 className="mb-6 text-lg font-medium text-foreground-bright">Statistics</h1>
+          <h1 className="mb-6 text-3xl font-semibold text-white">Statistics</h1>
           <div className="grid gap-4 sm:grid-cols-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="animate-pulse rounded-lg border border-border-subtle bg-background-elevated p-5">
-                <div className="h-4 w-20 rounded bg-background-card" />
-                <div className="mt-3 h-8 w-12 rounded bg-background-card" />
+              <div key={i} className="animate-pulse rounded-xl border border-[#333] bg-[#1a1a1a] p-6">
+                <div className="h-4 w-20 rounded bg-[#222]" />
+                <div className="mt-3 h-8 w-12 rounded bg-[#222]" />
               </div>
             ))}
           </div>
@@ -100,29 +99,28 @@ export default function StatisticsPage() {
     return (
       <div className="px-6 pt-8 pb-8">
         <div className="mx-auto w-full max-w-5xl">
-          <h1 className="mb-6 text-lg font-medium text-foreground-bright">Statistics</h1>
+          <h1 className="mb-6 text-3xl font-semibold text-white">Statistics</h1>
           <div className="space-y-6">
-            {/* Empty summary cards */}
             <div className="grid gap-4 sm:grid-cols-4">
               {["Sessions", "Questions", "Streak", "Within Target"].map((label) => (
-                <div key={label} className="rounded-lg border border-border-subtle bg-background-elevated p-4">
-                  <StatBlock label={label} value="--" />
+                <div key={label} className="rounded-xl border border-[#333] bg-[#1a1a1a] p-6 flex flex-col items-center justify-center">
+                  <span className="text-xs font-semibold text-[#a3a3a3] uppercase tracking-wider mb-2">{label}</span>
+                  <span className="text-4xl font-bold text-white">--</span>
                 </div>
               ))}
             </div>
 
-            {/* Empty chart placeholders */}
             {["Accuracy Over Time", "Response Time Over Time", "Performance Breakdown"].map((title) => (
-              <div key={title} className="rounded-lg border border-border-subtle bg-background-elevated p-6">
-                <h2 className="mb-4 text-xs uppercase tracking-wider text-foreground-muted">{title}</h2>
-                <div className="flex h-48 items-center justify-center rounded-lg border border-border-subtle bg-background-elevated">
+              <div key={title} className="rounded-xl border border-[#333] bg-[#1a1a1a] p-6">
+                <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-[#a3a3a3]">{title}</h2>
+                <div className="flex h-48 items-center justify-center rounded-xl border border-[#333] bg-[#171717]">
                   <div className="text-center">
-                    <p className="text-sm text-foreground-muted">
+                    <p className="text-sm text-[#737373]">
                       Complete a session to start tracking progress
                     </p>
                     <Link
                       href="/mental-math"
-                      className="mt-2 inline-block text-sm font-medium text-foreground-bright underline hover:no-underline"
+                      className="mt-2 inline-block text-sm font-medium text-white underline hover:no-underline"
                     >
                       Start a session
                     </Link>
@@ -145,22 +143,22 @@ export default function StatisticsPage() {
     <div className="px-6 pt-8 pb-8">
       <div className="mx-auto w-full max-w-5xl space-y-8">
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-medium text-foreground-bright">Statistics</h1>
-          <div className="flex rounded-md border border-border bg-background-card p-0.5">
+          <h1 className="text-3xl font-semibold text-white">Statistics</h1>
+          <div className="flex rounded-xl border border-[#333] bg-[#1a1a1a] p-1 text-sm">
             {(
               [
-                { key: "day", label: "By Day" },
-                { key: "session", label: "Per Session" },
+                { key: "day", label: "Day" },
+                { key: "session", label: "Week" },
               ] as const
             ).map(({ key, label }) => (
               <button
                 key={key}
                 onClick={() => setGranularity(key)}
                 className={cn(
-                  "rounded px-3 py-1 text-xs font-medium transition",
+                  "rounded-md px-4 py-1.5 font-medium transition",
                   granularity === key
-                    ? "bg-background-hover text-foreground-bright"
-                    : "text-foreground-muted hover:text-foreground"
+                    ? "bg-white text-black"
+                    : "text-[#a3a3a3] hover:text-white"
                 )}
               >
                 {label}
@@ -171,43 +169,46 @@ export default function StatisticsPage() {
 
         {/* Summary cards */}
         <div className="grid gap-4 sm:grid-cols-4">
-          <div className="rounded-lg border border-border-subtle bg-background-elevated p-4">
-            <StatBlock label="Sessions Completed" value={stats.totalSessions} />
+          <div className="rounded-xl border border-[#333] bg-[#1a1a1a] p-6 flex flex-col items-center justify-center">
+            <span className="text-xs font-semibold text-[#a3a3a3] uppercase tracking-wider mb-2">Sessions Completed</span>
+            <span className="text-4xl font-bold text-white">{stats.totalSessions}</span>
           </div>
-          <div className="rounded-lg border border-border-subtle bg-background-elevated p-4">
-            <StatBlock label="Questions Answered" value={stats.totalQuestionsAnswered} />
+          <div className="rounded-xl border border-[#333] bg-[#1a1a1a] p-6 flex flex-col items-center justify-center">
+            <span className="text-xs font-semibold text-[#a3a3a3] uppercase tracking-wider mb-2">Questions Answered</span>
+            <span className="text-4xl font-bold text-white">{stats.totalQuestionsAnswered}</span>
           </div>
-          <div className="rounded-lg border border-border-subtle bg-background-elevated p-4">
-            <StatBlock label="Current Streak" value={stats.currentStreak} subtext="days" />
+          <div className="rounded-xl border border-[#333] bg-[#1a1a1a] p-6 flex flex-col items-center justify-center">
+            <span className="text-xs font-semibold text-[#a3a3a3] uppercase tracking-wider mb-2">Current Streak</span>
+            <span className="text-4xl font-bold text-white">{stats.currentStreak}</span>
           </div>
-          <div className="rounded-lg border border-border-subtle bg-background-elevated p-4">
-            <StatBlock label="Within Target" value={`${stats.recentSnapshot.percentWithinTarget}%`} />
+          <div className="rounded-xl border border-[#333] bg-[#1a1a1a] p-6 flex flex-col items-center justify-center">
+            <span className="text-xs font-semibold text-[#a3a3a3] uppercase tracking-wider mb-2">Within Target</span>
+            <span className="text-4xl font-bold text-white">{stats.recentSnapshot.percentWithinTarget}%</span>
           </div>
         </div>
 
         {/* Charts side-by-side */}
         <div className="grid gap-6 lg:grid-cols-2">
-          {/* Accuracy Over Time */}
-          <div className="rounded-lg border border-border-subtle bg-background-elevated p-6">
-            <h2 className="mb-4 text-xs uppercase tracking-wider text-foreground-muted">Accuracy Over Time</h2>
+          <div className="rounded-xl border border-[#333] bg-[#1a1a1a] p-6">
+            <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-[#a3a3a3]">Accuracy Over Time</h2>
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={stats.accuracyOverTime}>
                 <XAxis
                   dataKey="date"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: "#666666", fontSize: 10 }}
+                  tick={{ fill: "#737373", fontSize: 10 }}
                   tickFormatter={(val: string) => formatChartDate(val)}
                 />
                 <YAxis
                   domain={[0, 100]}
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: "#666666", fontSize: 10 }}
+                  tick={{ fill: "#737373", fontSize: 10 }}
                   tickFormatter={(val: number) => `${val}%`}
                 />
                 <Tooltip
-                  contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2a2a2a", borderRadius: "6px", fontSize: "12px" }}
+                  contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #333", borderRadius: "12px", fontSize: "12px" }}
                   labelStyle={{ color: "#a3a3a3" }}
                   itemStyle={{ color: "#e5e5e5" }}
                   formatter={(value) => [`${value}%`, "Accuracy"]}
@@ -216,35 +217,34 @@ export default function StatisticsPage() {
                 <Line
                   type="monotone"
                   dataKey="accuracy"
-                  stroke="#666666"
+                  stroke="#a3a3a3"
                   strokeWidth={1.5}
-                  dot={{ fill: "#666666", r: 2 }}
+                  dot={{ fill: "#a3a3a3", r: 2 }}
                   activeDot={{ fill: "#e5e5e5", r: 4 }}
                 />
               </LineChart>
             </ResponsiveContainer>
           </div>
 
-          {/* Response Time Over Time */}
-          <div className="rounded-lg border border-border-subtle bg-background-elevated p-6">
-            <h2 className="mb-4 text-xs uppercase tracking-wider text-foreground-muted">Average Response Time</h2>
+          <div className="rounded-xl border border-[#333] bg-[#1a1a1a] p-6">
+            <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-[#a3a3a3]">Average Response Time</h2>
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={responseTimeChartData}>
                 <XAxis
                   dataKey="date"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: "#666666", fontSize: 10 }}
+                  tick={{ fill: "#737373", fontSize: 10 }}
                   tickFormatter={(val: string) => formatChartDate(val)}
                 />
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: "#666666", fontSize: 10 }}
+                  tick={{ fill: "#737373", fontSize: 10 }}
                   tickFormatter={(val: number) => `${val}s`}
                 />
                 <Tooltip
-                  contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2a2a2a", borderRadius: "6px", fontSize: "12px" }}
+                  contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #333", borderRadius: "12px", fontSize: "12px" }}
                   labelStyle={{ color: "#a3a3a3" }}
                   itemStyle={{ color: "#e5e5e5" }}
                   formatter={(value) => [`${value}s`, "Avg Response Time"]}
@@ -253,9 +253,9 @@ export default function StatisticsPage() {
                 <Line
                   type="monotone"
                   dataKey="avgSeconds"
-                  stroke="#666666"
+                  stroke="#a3a3a3"
                   strokeWidth={1.5}
-                  dot={{ fill: "#666666", r: 2 }}
+                  dot={{ fill: "#a3a3a3", r: 2 }}
                   activeDot={{ fill: "#e5e5e5", r: 4 }}
                 />
               </LineChart>
@@ -264,10 +264,10 @@ export default function StatisticsPage() {
         </div>
 
         {/* Performance Breakdown */}
-        <div className="rounded-lg border border-border-subtle bg-background-elevated p-6">
+        <div className="rounded-xl border border-[#333] bg-[#1a1a1a] p-6">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xs uppercase tracking-wider text-foreground-muted">Performance Breakdown</h2>
-            <div className="rounded-md border border-border bg-background-card p-0.5">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-[#a3a3a3]">Performance Breakdown</h2>
+            <div className="rounded-xl border border-[#333] bg-[#0a0a0a] p-1">
               {(
                 [
                   { key: "level", label: "By Level" },
@@ -279,10 +279,10 @@ export default function StatisticsPage() {
                   key={key}
                   onClick={() => setGroupBy(key)}
                   className={cn(
-                    "rounded px-3 py-1 text-xs font-medium transition",
+                    "rounded-md px-3 py-1 text-xs font-medium transition",
                     groupBy === key
-                      ? "bg-background-hover text-foreground-bright"
-                      : "text-foreground-muted hover:text-foreground"
+                      ? "bg-white text-black"
+                      : "text-[#a3a3a3] hover:text-white"
                   )}
                 >
                   {label}
@@ -293,11 +293,11 @@ export default function StatisticsPage() {
 
           {breakdownLoading ? (
             <div className="flex h-64 items-center justify-center">
-              <p className="text-sm text-foreground-muted">Loading...</p>
+              <p className="text-sm text-[#737373]">Loading...</p>
             </div>
           ) : breakdown.length === 0 ? (
-            <div className="flex h-64 items-center justify-center rounded-lg border border-border-subtle bg-background-elevated">
-              <p className="text-sm text-foreground-muted">No data for this breakdown</p>
+            <div className="flex h-64 items-center justify-center rounded-xl border border-[#333] bg-[#171717]">
+              <p className="text-sm text-[#737373]">No data for this breakdown</p>
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={280}>
@@ -307,7 +307,7 @@ export default function StatisticsPage() {
                   domain={[0, 100]}
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: "#666666", fontSize: 10 }}
+                  tick={{ fill: "#737373", fontSize: 10 }}
                   tickFormatter={(val: number) => `${val}%`}
                 />
                 <YAxis
@@ -315,10 +315,10 @@ export default function StatisticsPage() {
                   dataKey="group"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: "#666666", fontSize: 10 }}
+                  tick={{ fill: "#737373", fontSize: 10 }}
                 />
                 <Tooltip
-                  contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2a2a2a", borderRadius: "6px", fontSize: "12px" }}
+                  contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #333", borderRadius: "12px", fontSize: "12px" }}
                   labelStyle={{ color: "#a3a3a3" }}
                   itemStyle={{ color: "#e5e5e5" }}
                   formatter={(value, name) => {
@@ -327,7 +327,7 @@ export default function StatisticsPage() {
                     return [`${(v / 1000).toFixed(1)}s`, "Avg Response Time"];
                   }}
                 />
-                <Bar dataKey="accuracy" fill="#3d3d3d" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="accuracy" fill="#8c8c8e" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}

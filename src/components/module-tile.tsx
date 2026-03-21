@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LivingPixels } from "@/components/living-pixels";
 
 interface ModuleTileProps {
   title: string;
@@ -20,26 +21,21 @@ export function ModuleTile({
   const content = (
     <div
       className={cn(
-        "group relative flex aspect-[5/3] w-full flex-col items-center justify-center rounded-lg p-6 transition-all duration-200",
+        "group relative flex h-40 w-full flex-col items-center justify-center rounded-xl overflow-hidden transition-all duration-300",
         isActive
-          ? "border-2 border-dashed border-foreground-muted bg-background-card hover:scale-[1.04] hover:bg-background-hover cursor-pointer"
-          : "border border-border bg-background-elevated hover:scale-[1.03] hover:bg-background-hover cursor-default"
+          ? "border border-[#a3a3a3] bg-[#1a1a1a] hover:bg-[#222] cursor-pointer glow-effect"
+          : "border border-[rgba(64,64,64,0.5)] bg-[#1a1a1a] hover:bg-[#222] cursor-default"
       )}
     >
+      <div className={cn("absolute inset-0 card-bg-pattern transition-opacity", isActive ? "opacity-30 group-hover:opacity-50" : "opacity-20")} />
+      <LivingPixels count={isActive ? 12 : 6} className={isActive ? undefined : "opacity-50"} />
       {isLocked ? (
         <Lock
-          className="h-8 w-8 text-foreground-muted/50 transition-all duration-200 group-hover:h-9 group-hover:w-9 group-hover:text-foreground-muted/70"
+          className="relative z-10 h-8 w-8 text-[#737373]"
           strokeWidth={1.5}
         />
       ) : (
-        <span
-          className={cn(
-            "text-center text-sm font-medium transition-colors",
-            isActive
-              ? "text-foreground group-hover:text-foreground-bright"
-              : "text-foreground-muted"
-          )}
-        >
+        <span className="relative z-10 text-xl font-semibold tracking-wide text-white">
           {title}
         </span>
       )}

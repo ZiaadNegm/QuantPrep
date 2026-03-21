@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { LivingPixels } from "@/components/living-pixels";
 
 const LEVELS = ["L1", "L2", "L3", "L4", "L5"];
 const OPERATIONS = ["Add", "Sub", "Mul", "Div"];
@@ -11,11 +12,11 @@ const QUESTION_PRESETS = [10, 20, 40, 80];
 const TIMER_PRESETS = [3, 5, 10, 15];
 
 const LEVEL_INFO = [
-  { id: "L1", label: "Easy", target: "< 2s" },
-  { id: "L2", label: "Medium", target: "< 5s" },
-  { id: "L3", label: "Hard", target: "< 7s" },
-  { id: "L4", label: "Very Hard", target: "< 10s" },
-  { id: "L5", label: "Elite", target: "< 15s" },
+  { id: "L1", label: "Novice", target: "< 2s" },
+  { id: "L2", label: "Associate", target: "< 5s" },
+  { id: "L3", label: "Professional", target: "< 7s" },
+  { id: "L4", label: "Expert", target: "< 10s" },
+  { id: "L5", label: "Master", target: "< 15s" },
 ];
 
 const OP_SYMBOLS: Record<string, string> = {
@@ -87,107 +88,144 @@ export default function PracticePage() {
     <div className="flex flex-1 flex-col">
       {/* Step 1: Level Selection */}
       {step === 1 && (
-        <div className="flex flex-1 flex-col items-center justify-center px-8">
-          <div className="grid w-full max-w-6xl grid-cols-5 gap-4">
-            {LEVEL_INFO.map((level) => {
-              const selected = selectedLevels.includes(level.id);
-              return (
-                <button
-                  key={level.id}
-                  type="button"
-                  onClick={() => toggleItem(selectedLevels, level.id, setSelectedLevels)}
-                  className={cn(
-                    "flex flex-col items-center justify-center rounded-lg border p-8 sm:p-10 transition-all duration-200 cursor-pointer",
-                    selected
-                      ? "border-foreground-muted bg-background-card scale-[1.02]"
-                      : "border-border bg-background-elevated hover:bg-background-card hover:scale-[1.01]"
-                  )}
-                >
-                  <span
+        <div className="flex flex-1 flex-col items-center justify-center px-4 md:px-20 py-24">
+          <div className="w-full max-w-6xl">
+            <div className="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-4 mb-16">
+              {LEVEL_INFO.map((level) => {
+                const selected = selectedLevels.includes(level.id);
+                return (
+                  <button
+                    key={level.id}
+                    type="button"
+                    onClick={() => toggleItem(selectedLevels, level.id, setSelectedLevels)}
                     className={cn(
-                      "font-mono text-5xl sm:text-7xl font-bold",
-                      selected ? "text-foreground-bright" : "text-foreground"
+                      "group relative w-full aspect-square md:w-48 bg-[#1c1b1b] overflow-hidden flex flex-col items-center justify-center rounded-xl transition-all duration-300 cursor-pointer",
+                      selected
+                        ? "border border-white/20"
+                        : "border border-transparent hover:border-white/10 hover:bg-[#2a2a2a] hover:scale-[1.05]"
                     )}
                   >
-                    {level.id}
-                  </span>
-                  <span className="mt-3 text-sm text-foreground-muted">{level.label}</span>
-                  <span className="mt-1 text-xs text-foreground-muted">{level.target}</span>
-                </button>
-              );
-            })}
-          </div>
+                    <div className={cn(
+                      "absolute inset-0 card-bg-pattern transition-opacity duration-500",
+                      selected ? "opacity-40" : "opacity-20 group-hover:opacity-40"
+                    )} />
+                    <LivingPixels count={selected ? 12 : 6} className={selected ? undefined : "opacity-50"} />
+                    <span className="relative z-10 text-6xl font-semibold tracking-tighter text-white">
+                      {level.id}
+                    </span>
+                    <span className={cn(
+                      "relative z-10 uppercase tracking-[0.15em] text-[10px] mt-2 transition-colors",
+                      selected ? "text-white" : "text-[#737373] group-hover:text-white"
+                    )}>
+                      {level.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
-          <button
-            type="button"
-            onClick={() => setStep(2)}
-            className="mt-10 w-full max-w-xs rounded-lg border border-foreground-muted bg-background-card px-8 py-3 font-mono font-medium text-foreground-bright transition-all cursor-pointer hover:scale-[1.02] hover:bg-background-hover"
-          >
-            Continue
-          </button>
+            <div className="flex flex-col items-center">
+              <button
+                type="button"
+                onClick={() => setStep(2)}
+                className="px-16 py-4 bg-[#2a2a2a] text-white text-sm font-semibold uppercase tracking-[0.2em] border border-[rgba(64,64,64,0.3)] hover:bg-[#404040] transition-all duration-300 rounded-xl cursor-pointer"
+              >
+                Continue
+              </button>
+              <p className="mt-8 text-[10px] tracking-[0.15em] uppercase text-[#737373]">
+                Select a difficulty level to initialize training module
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Step 2: Operations + Number Types */}
       {step === 2 && (
-        <div className="flex flex-1 flex-col items-center justify-center px-8">
-          <div className="grid w-full max-w-xl grid-cols-4 gap-4">
-            {OPERATIONS.map((op) => {
-              const selected = selectedOps.includes(op);
-              return (
-                <button
-                  key={op}
-                  type="button"
-                  onClick={() => toggleItem(selectedOps, op, setSelectedOps)}
-                  className={cn(
-                    "flex items-center justify-center aspect-square rounded-lg border font-mono text-4xl sm:text-5xl transition-all duration-200 cursor-pointer",
-                    selected
-                      ? "border-foreground-muted bg-background-card scale-[1.02] text-foreground-bright"
-                      : "border-border bg-background-elevated hover:bg-background-card hover:scale-[1.01] text-foreground"
-                  )}
-                >
-                  {OP_SYMBOLS[op]}
-                </button>
-              );
-            })}
-          </div>
+        <div className="flex flex-1 flex-col items-center justify-center px-4 md:px-20 py-24">
+          <div className="w-full max-w-5xl space-y-16">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {OPERATIONS.map((op) => {
+                const selected = selectedOps.includes(op);
+                return (
+                  <button
+                    key={op}
+                    type="button"
+                    onClick={() => toggleItem(selectedOps, op, setSelectedOps)}
+                    className={cn(
+                      "group relative aspect-square bg-[#1c1b1b] overflow-hidden flex flex-col items-center justify-center rounded-xl transition-all duration-300 cursor-pointer",
+                      selected
+                        ? "border border-white/20 scale-[1.05]"
+                        : "border border-transparent hover:border-white/10 hover:bg-[#2a2a2a] hover:scale-[1.05]"
+                    )}
+                  >
+                    <div className={cn(
+                      "absolute inset-0 card-bg-pattern transition-opacity duration-500",
+                      selected ? "opacity-40" : "opacity-20 group-hover:opacity-40"
+                    )} />
+                    <LivingPixels />
+                    <span className="relative z-10 text-6xl text-white mb-4">
+                      {OP_SYMBOLS[op]}
+                    </span>
+                    <span className={cn(
+                      "relative z-10 font-semibold tracking-widest uppercase text-[0.625rem] transition-colors",
+                      selected ? "text-white" : "text-[#737373] group-hover:text-white"
+                    )}>
+                      {op === "Add" ? "Addition" : op === "Sub" ? "Subtraction" : op === "Mul" ? "Multiplication" : "Division"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
-          <div className="mt-10 grid w-full max-w-xl grid-cols-3 gap-4">
-            {NUMBER_TYPES.map((t) => {
-              const selected = selectedTypes.includes(t);
-              return (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => toggleItem(selectedTypes, t, setSelectedTypes)}
-                  className={cn(
-                    "flex items-center justify-center rounded-lg border px-6 py-6 text-lg font-medium transition-all duration-200 cursor-pointer",
-                    selected
-                      ? "border-foreground-muted bg-background-card scale-[1.02] text-foreground-bright"
-                      : "border-border bg-background-elevated hover:bg-background-card hover:scale-[1.01] text-foreground"
-                  )}
-                >
-                  {t}
-                </button>
-              );
-            })}
-          </div>
+            <div className="flex flex-col items-center space-y-8">
+              <div className="flex gap-16 md:gap-32">
+                {NUMBER_TYPES.map((t) => {
+                  const selected = selectedTypes.includes(t);
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => toggleItem(selectedTypes, t, setSelectedTypes)}
+                      className="group relative cursor-pointer"
+                    >
+                      <span className={cn(
+                        "font-semibold tracking-[0.25em] uppercase text-[0.75rem] transition-colors",
+                        selected ? "text-white" : "text-[#737373] hover:text-white"
+                      )}>
+                        {t === "Integer" ? "Integers" : t === "Decimal" ? "Decimals" : "Fractions"}
+                      </span>
+                      <div className={cn(
+                        "absolute -bottom-2 left-0 h-[1px] bg-white transition-all duration-300",
+                        selected ? "w-full" : "w-0 group-hover:w-full"
+                      )} />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-          <div className="mt-10 flex gap-4">
-            <button
-              type="button"
-              onClick={() => setStep(1)}
-              className="rounded-lg border border-border px-6 py-3 font-mono text-foreground-muted cursor-pointer transition-all hover:scale-[1.01] hover:bg-background-hover"
-            >
-              Back
-            </button>
-            <button
-              type="button"
-              onClick={() => setStep(3)}
-              className="rounded-lg border border-foreground-muted bg-background-card px-8 py-3 font-mono font-medium text-foreground-bright cursor-pointer transition-all hover:scale-[1.02] hover:bg-background-hover"
-            >
-              Continue
-            </button>
+            <div className="flex flex-col items-center pt-8">
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="px-10 py-4 bg-transparent text-[#a3a3a3] text-sm font-semibold uppercase tracking-[0.2em] border border-[rgba(64,64,64,0.3)] hover:bg-[#2a2a2a] transition-all duration-300 rounded-xl cursor-pointer"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStep(3)}
+                  className="px-16 py-4 bg-[#2a2a2a] text-white text-sm font-semibold uppercase tracking-[0.2em] border border-[rgba(64,64,64,0.3)] hover:bg-[#404040] transition-all duration-300 rounded-xl cursor-pointer"
+                >
+                  Continue
+                </button>
+              </div>
+              <p className="mt-8 text-[10px] tracking-[0.15em] uppercase text-[#737373]">
+                Select arithmetic parameters to initialize training session
+              </p>
+            </div>
           </div>
         </div>
       )}
@@ -197,11 +235,11 @@ export default function PracticePage() {
         <div className="flex flex-1 flex-col items-center justify-center">
           <form
             onSubmit={handleSubmit}
-            className="w-full max-w-lg space-y-8 rounded-lg border border-border-subtle bg-background-elevated p-8"
+            className="w-full max-w-lg space-y-8 rounded-xl border border-[#333] bg-[#1a1a1a] p-8"
           >
             {/* Session Type */}
             <div>
-              <span className="mb-2 block text-sm text-foreground-muted">Session Type</span>
+              <span className="mb-2 block text-sm text-[#737373]">Session Type</span>
               <div className="flex gap-2">
                 {(["finite", "open-ended"] as const).map((type) => (
                   <button
@@ -209,10 +247,10 @@ export default function PracticePage() {
                     type="button"
                     onClick={() => setSessionType(type)}
                     className={cn(
-                      "rounded-md border px-4 py-2 font-mono text-sm transition-all",
+                      "rounded-xl border px-4 py-2 text-sm transition-all",
                       sessionType === type
-                        ? "border-foreground-muted bg-background-card text-foreground-bright"
-                        : "border-border text-foreground-muted hover:border-foreground-muted hover:text-foreground"
+                        ? "border-[#a3a3a3] bg-[#222] text-white"
+                        : "border-[#333] text-[#737373] hover:border-[#a3a3a3] hover:text-[#a3a3a3]"
                     )}
                   >
                     {type === "finite" ? "Finite" : "Open-ended"}
@@ -224,7 +262,7 @@ export default function PracticePage() {
             {/* Question Count */}
             {sessionType === "finite" && (
               <div>
-                <span className="mb-2 block text-sm text-foreground-muted">Number of Questions</span>
+                <span className="mb-2 block text-sm text-[#737373]">Number of Questions</span>
                 <div className="flex flex-wrap gap-2">
                   {QUESTION_PRESETS.map((count) => (
                     <button
@@ -232,17 +270,17 @@ export default function PracticePage() {
                       type="button"
                       onClick={() => setQuestionCount(count)}
                       className={cn(
-                        "rounded-md border px-4 py-2 font-mono text-sm transition-all",
+                        "rounded-xl border px-4 py-2 text-sm transition-all",
                         questionCount === count
-                          ? "border-foreground-muted bg-background-card text-foreground-bright"
-                          : "border-border text-foreground-muted hover:border-foreground-muted hover:text-foreground"
+                          ? "border-[#a3a3a3] bg-[#222] text-white"
+                          : "border-[#333] text-[#737373] hover:border-[#a3a3a3] hover:text-[#a3a3a3]"
                       )}
                     >
                       {count}
                     </button>
                   ))}
                   {!QUESTION_PRESETS.includes(questionCount) && (
-                    <span className="rounded-md border border-foreground-muted bg-background-card px-4 py-2 font-mono text-sm text-foreground-bright">
+                    <span className="rounded-xl border border-[#a3a3a3] bg-[#222] px-4 py-2 text-sm text-white">
                       {questionCount}
                     </span>
                   )}
@@ -253,7 +291,7 @@ export default function PracticePage() {
             {/* Timer */}
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <span className="text-sm text-foreground-muted">Timer</span>
+                <span className="text-sm text-[#737373]">Timer</span>
                 <button
                   type="button"
                   role="switch"
@@ -261,12 +299,12 @@ export default function PracticePage() {
                   onClick={() => setTimerEnabled(!timerEnabled)}
                   className={cn(
                     "relative h-5 w-9 rounded-full transition-colors",
-                    timerEnabled ? "bg-foreground-muted" : "bg-border"
+                    timerEnabled ? "bg-[#737373]" : "bg-[#333]"
                   )}
                 >
                   <span
                     className={cn(
-                      "absolute top-0.5 h-4 w-4 rounded-full bg-background-card transition-transform",
+                      "absolute top-0.5 h-4 w-4 rounded-full bg-[#1a1a1a] transition-transform",
                       timerEnabled ? "left-4" : "left-0.5"
                     )}
                   />
@@ -274,7 +312,7 @@ export default function PracticePage() {
               </div>
               {timerEnabled && (
                 <div>
-                  <span className="mb-2 block text-sm text-foreground-muted">
+                  <span className="mb-2 block text-sm text-[#737373]">
                     Duration (minutes)
                   </span>
                   <div className="flex flex-wrap gap-2">
@@ -284,10 +322,10 @@ export default function PracticePage() {
                         type="button"
                         onClick={() => setTimerMinutes(mins)}
                         className={cn(
-                          "rounded-md border px-4 py-2 font-mono text-sm transition-all",
+                          "rounded-xl border px-4 py-2 text-sm transition-all",
                           timerMinutes === mins
-                            ? "border-foreground-muted bg-background-card text-foreground-bright"
-                            : "border-border text-foreground-muted hover:border-foreground-muted hover:text-foreground"
+                            ? "border-[#a3a3a3] bg-[#222] text-white"
+                            : "border-[#333] text-[#737373] hover:border-[#a3a3a3] hover:text-[#a3a3a3]"
                         )}
                       >
                         {mins}
@@ -304,14 +342,14 @@ export default function PracticePage() {
               <button
                 type="button"
                 onClick={() => setStep(2)}
-                className="rounded-lg border border-border px-6 py-3 font-mono text-foreground-muted cursor-pointer transition-all hover:scale-[1.01] hover:bg-background-hover"
+                className="px-10 py-4 bg-transparent text-[#a3a3a3] text-sm font-semibold uppercase tracking-[0.2em] border border-[rgba(64,64,64,0.3)] hover:bg-[#2a2a2a] transition-all duration-300 rounded-xl cursor-pointer"
               >
                 Back
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="rounded-lg border border-foreground-muted bg-background-card px-8 py-3 font-mono font-medium text-foreground-bright cursor-pointer transition-all hover:scale-[1.02] hover:bg-background-hover disabled:opacity-50"
+                className="px-16 py-4 bg-[#2a2a2a] text-white text-sm font-semibold uppercase tracking-[0.2em] border border-[rgba(64,64,64,0.3)] hover:bg-[#404040] transition-all duration-300 rounded-xl cursor-pointer disabled:opacity-50"
               >
                 {submitting ? "Starting..." : "Start Practice"}
               </button>

@@ -9,10 +9,11 @@ import {
   Bar,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { cn } from "@/lib/utils";
+import { StatBlock } from "@/components/stat-block";
 
 interface Stats {
   totalSessions: number;
@@ -41,18 +42,28 @@ export default function StatisticsPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [breakdown, setBreakdown] = useState<BreakdownItem[]>([]);
   const [groupBy, setGroupBy] = useState<GroupBy>("level");
+  const [granularity, setGranularity] = useState<"day" | "session">("day");
   const [loading, setLoading] = useState(true);
   const [breakdownLoading, setBreakdownLoading] = useState(true);
 
+  function formatChartDate(val: string) {
+    if (granularity === "session") {
+      const d = new Date(val);
+      return `${(d.getMonth() + 1).toString().padStart(2, "0")}-${d.getDate().toString().padStart(2, "0")} ${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
+    }
+    return val.slice(5);
+  }
+
   useEffect(() => {
-    fetch("/api/stats")
+    setLoading(true);
+    fetch(`/api/stats?granularity=${granularity}`)
       .then((res) => res.json())
       .then((data) => {
         if (!data.error) setStats(data);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [granularity]);
 
   useEffect(() => {
     setBreakdownLoading(true);
@@ -69,15 +80,17 @@ export default function StatisticsPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-5xl">
-        <h1 className="mb-6 text-3xl font-bold">Statistics</h1>
-        <div className="grid gap-4 sm:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="animate-pulse rounded border p-5">
-              <div className="h-4 w-20 rounded bg-gray-200" />
-              <div className="mt-3 h-8 w-12 rounded bg-gray-200" />
-            </div>
-          ))}
+      <div className="px-6 pt-8 pb-8">
+        <div className="mx-auto w-full max-w-5xl">
+          <h1 className="mb-6 text-lg font-medium text-foreground-bright">Statistics</h1>
+          <div className="grid gap-4 sm:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="animate-pulse rounded-lg border border-border-subtle bg-background-elevated p-5">
+                <div className="h-4 w-20 rounded bg-background-card" />
+                <div className="mt-3 h-8 w-12 rounded bg-background-card" />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -85,38 +98,39 @@ export default function StatisticsPage() {
 
   if (!hasData) {
     return (
-      <div className="mx-auto max-w-5xl">
-        <h1 className="mb-6 text-3xl font-bold">Statistics</h1>
-        <div className="space-y-6">
-          {/* Empty summary cards */}
-          <div className="grid gap-4 sm:grid-cols-4">
-            {["Sessions", "Questions", "Streak", "Within Target"].map((label) => (
-              <div key={label} className="rounded border p-5">
-                <p className="text-sm text-gray-500">{label}</p>
-                <p className="mt-1 text-2xl font-bold text-gray-300">--</p>
+      <div className="px-6 pt-8 pb-8">
+        <div className="mx-auto w-full max-w-5xl">
+          <h1 className="mb-6 text-lg font-medium text-foreground-bright">Statistics</h1>
+          <div className="space-y-6">
+            {/* Empty summary cards */}
+            <div className="grid gap-4 sm:grid-cols-4">
+              {["Sessions", "Questions", "Streak", "Within Target"].map((label) => (
+                <div key={label} className="rounded-lg border border-border-subtle bg-background-elevated p-4">
+                  <StatBlock label={label} value="--" />
+                </div>
+              ))}
+            </div>
+
+            {/* Empty chart placeholders */}
+            {["Accuracy Over Time", "Response Time Over Time", "Performance Breakdown"].map((title) => (
+              <div key={title} className="rounded-lg border border-border-subtle bg-background-elevated p-6">
+                <h2 className="mb-4 text-xs uppercase tracking-wider text-foreground-muted">{title}</h2>
+                <div className="flex h-48 items-center justify-center rounded-lg border border-border-subtle bg-background-elevated">
+                  <div className="text-center">
+                    <p className="text-sm text-foreground-muted">
+                      Complete a session to start tracking progress
+                    </p>
+                    <Link
+                      href="/mental-math"
+                      className="mt-2 inline-block text-sm font-medium text-foreground-bright underline hover:no-underline"
+                    >
+                      Start a session
+                    </Link>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
-
-          {/* Empty chart placeholders */}
-          {["Accuracy Over Time", "Response Time Over Time", "Performance Breakdown"].map((title) => (
-            <div key={title} className="rounded border p-6">
-              <h2 className="mb-4 text-lg font-semibold">{title}</h2>
-              <div className="flex h-48 items-center justify-center rounded bg-gray-50">
-                <div className="text-center">
-                  <p className="text-sm text-gray-400">
-                    Complete a session to start tracking progress
-                  </p>
-                  <Link
-                    href="/mental-math"
-                    className="mt-2 inline-block text-sm font-medium text-black underline hover:no-underline"
-                  >
-                    Start a session
-                  </Link>
-                </div>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     );
@@ -128,115 +142,26 @@ export default function StatisticsPage() {
   }));
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8">
-      <h1 className="text-3xl font-bold">Statistics</h1>
-
-      {/* Summary cards */}
-      <div className="grid gap-4 sm:grid-cols-4">
-        <div className="rounded border p-5">
-          <p className="text-sm text-gray-500">Sessions Completed</p>
-          <p className="mt-1 text-2xl font-bold">{stats.totalSessions}</p>
-        </div>
-        <div className="rounded border p-5">
-          <p className="text-sm text-gray-500">Questions Answered</p>
-          <p className="mt-1 text-2xl font-bold">{stats.totalQuestionsAnswered}</p>
-        </div>
-        <div className="rounded border p-5">
-          <p className="text-sm text-gray-500">Current Streak</p>
-          <p className="mt-1 text-2xl font-bold">
-            {stats.currentStreak}
-            <span className="ml-1 text-sm font-normal text-gray-400">days</span>
-          </p>
-        </div>
-        <div className="rounded border p-5">
-          <p className="text-sm text-gray-500">Within Target</p>
-          <p className="mt-1 text-2xl font-bold">
-            {stats.recentSnapshot.percentWithinTarget}%
-          </p>
-        </div>
-      </div>
-
-      {/* Accuracy Over Time */}
-      <div className="rounded border p-6">
-        <h2 className="mb-4 text-lg font-semibold">Accuracy Over Time</h2>
-        <ResponsiveContainer width="100%" height={280}>
-          <LineChart data={stats.accuracyOverTime}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="date"
-              tick={{ fontSize: 12 }}
-              tickFormatter={(val: string) => val.slice(5)}
-            />
-            <YAxis
-              domain={[0, 100]}
-              tick={{ fontSize: 12 }}
-              tickFormatter={(val: number) => `${val}%`}
-            />
-            <Tooltip
-              formatter={(value) => [`${value}%`, "Accuracy"]}
-              labelFormatter={(label) => `${label}`}
-            />
-            <Line
-              type="monotone"
-              dataKey="accuracy"
-              stroke="#000"
-              strokeWidth={2}
-              dot={{ r: 3 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Response Time Over Time */}
-      <div className="rounded border p-6">
-        <h2 className="mb-4 text-lg font-semibold">Average Response Time Over Time</h2>
-        <ResponsiveContainer width="100%" height={280}>
-          <LineChart data={responseTimeChartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="date"
-              tick={{ fontSize: 12 }}
-              tickFormatter={(val: string) => val.slice(5)}
-            />
-            <YAxis
-              tick={{ fontSize: 12 }}
-              tickFormatter={(val: number) => `${val}s`}
-            />
-            <Tooltip
-              formatter={(value) => [`${value}s`, "Avg Response Time"]}
-              labelFormatter={(label) => `${label}`}
-            />
-            <Line
-              type="monotone"
-              dataKey="avgSeconds"
-              stroke="#000"
-              strokeWidth={2}
-              dot={{ r: 3 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Performance Breakdown */}
-      <div className="rounded border p-6">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Performance Breakdown</h2>
-          <div className="flex gap-1 rounded border p-0.5">
+    <div className="px-6 pt-8 pb-8">
+      <div className="mx-auto w-full max-w-5xl space-y-8">
+        <div className="flex items-center justify-between">
+          <h1 className="text-lg font-medium text-foreground-bright">Statistics</h1>
+          <div className="flex rounded-md border border-border bg-background-card p-0.5">
             {(
               [
-                { key: "level", label: "By Level" },
-                { key: "operation", label: "By Operation" },
-                { key: "number_type", label: "By Number Type" },
+                { key: "day", label: "By Day" },
+                { key: "session", label: "Per Session" },
               ] as const
             ).map(({ key, label }) => (
               <button
                 key={key}
-                onClick={() => setGroupBy(key)}
-                className={`rounded px-3 py-1 text-xs font-medium transition ${
-                  groupBy === key
-                    ? "bg-black text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
+                onClick={() => setGranularity(key)}
+                className={cn(
+                  "rounded px-3 py-1 text-xs font-medium transition",
+                  granularity === key
+                    ? "bg-background-hover text-foreground-bright"
+                    : "text-foreground-muted hover:text-foreground"
+                )}
               >
                 {label}
               </button>
@@ -244,43 +169,169 @@ export default function StatisticsPage() {
           </div>
         </div>
 
-        {breakdownLoading ? (
-          <div className="flex h-64 items-center justify-center">
-            <p className="text-sm text-gray-400">Loading...</p>
+        {/* Summary cards */}
+        <div className="grid gap-4 sm:grid-cols-4">
+          <div className="rounded-lg border border-border-subtle bg-background-elevated p-4">
+            <StatBlock label="Sessions Completed" value={stats.totalSessions} />
           </div>
-        ) : breakdown.length === 0 ? (
-          <div className="flex h-64 items-center justify-center rounded bg-gray-50">
-            <p className="text-sm text-gray-400">No data for this breakdown</p>
+          <div className="rounded-lg border border-border-subtle bg-background-elevated p-4">
+            <StatBlock label="Questions Answered" value={stats.totalQuestionsAnswered} />
           </div>
-        ) : (
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={breakdown}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="group" tick={{ fontSize: 12 }} />
-              <YAxis
-                yAxisId="accuracy"
-                domain={[0, 100]}
-                tick={{ fontSize: 12 }}
-                tickFormatter={(val: number) => `${val}%`}
-              />
-              <YAxis
-                yAxisId="time"
-                orientation="right"
-                tick={{ fontSize: 12 }}
-                tickFormatter={(val: number) => `${(val / 1000).toFixed(1)}s`}
-              />
-              <Tooltip
-                formatter={(value, name) => {
-                  const v = Number(value);
-                  if (name === "accuracy") return [`${v}%`, "Accuracy"];
-                  return [`${(v / 1000).toFixed(1)}s`, "Avg Response Time"];
-                }}
-              />
-              <Bar yAxisId="accuracy" dataKey="accuracy" fill="#000" radius={[4, 4, 0, 0]} />
-              <Bar yAxisId="time" dataKey="avgResponseTimeMs" fill="#d1d5db" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        )}
+          <div className="rounded-lg border border-border-subtle bg-background-elevated p-4">
+            <StatBlock label="Current Streak" value={stats.currentStreak} subtext="days" />
+          </div>
+          <div className="rounded-lg border border-border-subtle bg-background-elevated p-4">
+            <StatBlock label="Within Target" value={`${stats.recentSnapshot.percentWithinTarget}%`} />
+          </div>
+        </div>
+
+        {/* Charts side-by-side */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Accuracy Over Time */}
+          <div className="rounded-lg border border-border-subtle bg-background-elevated p-6">
+            <h2 className="mb-4 text-xs uppercase tracking-wider text-foreground-muted">Accuracy Over Time</h2>
+            <ResponsiveContainer width="100%" height={280}>
+              <LineChart data={stats.accuracyOverTime}>
+                <XAxis
+                  dataKey="date"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: "#666666", fontSize: 10 }}
+                  tickFormatter={(val: string) => formatChartDate(val)}
+                />
+                <YAxis
+                  domain={[0, 100]}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: "#666666", fontSize: 10 }}
+                  tickFormatter={(val: number) => `${val}%`}
+                />
+                <Tooltip
+                  contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2a2a2a", borderRadius: "6px", fontSize: "12px" }}
+                  labelStyle={{ color: "#a3a3a3" }}
+                  itemStyle={{ color: "#e5e5e5" }}
+                  formatter={(value) => [`${value}%`, "Accuracy"]}
+                  labelFormatter={(label) => `${label}`}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="accuracy"
+                  stroke="#666666"
+                  strokeWidth={1.5}
+                  dot={{ fill: "#666666", r: 2 }}
+                  activeDot={{ fill: "#e5e5e5", r: 4 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Response Time Over Time */}
+          <div className="rounded-lg border border-border-subtle bg-background-elevated p-6">
+            <h2 className="mb-4 text-xs uppercase tracking-wider text-foreground-muted">Average Response Time</h2>
+            <ResponsiveContainer width="100%" height={280}>
+              <LineChart data={responseTimeChartData}>
+                <XAxis
+                  dataKey="date"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: "#666666", fontSize: 10 }}
+                  tickFormatter={(val: string) => formatChartDate(val)}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: "#666666", fontSize: 10 }}
+                  tickFormatter={(val: number) => `${val}s`}
+                />
+                <Tooltip
+                  contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2a2a2a", borderRadius: "6px", fontSize: "12px" }}
+                  labelStyle={{ color: "#a3a3a3" }}
+                  itemStyle={{ color: "#e5e5e5" }}
+                  formatter={(value) => [`${value}s`, "Avg Response Time"]}
+                  labelFormatter={(label) => `${label}`}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="avgSeconds"
+                  stroke="#666666"
+                  strokeWidth={1.5}
+                  dot={{ fill: "#666666", r: 2 }}
+                  activeDot={{ fill: "#e5e5e5", r: 4 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Performance Breakdown */}
+        <div className="rounded-lg border border-border-subtle bg-background-elevated p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xs uppercase tracking-wider text-foreground-muted">Performance Breakdown</h2>
+            <div className="rounded-md border border-border bg-background-card p-0.5">
+              {(
+                [
+                  { key: "level", label: "By Level" },
+                  { key: "operation", label: "By Operation" },
+                  { key: "number_type", label: "By Number Type" },
+                ] as const
+              ).map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => setGroupBy(key)}
+                  className={cn(
+                    "rounded px-3 py-1 text-xs font-medium transition",
+                    groupBy === key
+                      ? "bg-background-hover text-foreground-bright"
+                      : "text-foreground-muted hover:text-foreground"
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {breakdownLoading ? (
+            <div className="flex h-64 items-center justify-center">
+              <p className="text-sm text-foreground-muted">Loading...</p>
+            </div>
+          ) : breakdown.length === 0 ? (
+            <div className="flex h-64 items-center justify-center rounded-lg border border-border-subtle bg-background-elevated">
+              <p className="text-sm text-foreground-muted">No data for this breakdown</p>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={breakdown} layout="vertical">
+                <XAxis
+                  type="number"
+                  domain={[0, 100]}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: "#666666", fontSize: 10 }}
+                  tickFormatter={(val: number) => `${val}%`}
+                />
+                <YAxis
+                  type="category"
+                  dataKey="group"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: "#666666", fontSize: 10 }}
+                />
+                <Tooltip
+                  contentStyle={{ backgroundColor: "#1a1a1a", border: "1px solid #2a2a2a", borderRadius: "6px", fontSize: "12px" }}
+                  labelStyle={{ color: "#a3a3a3" }}
+                  itemStyle={{ color: "#e5e5e5" }}
+                  formatter={(value, name) => {
+                    const v = Number(value);
+                    if (name === "accuracy") return [`${v}%`, "Accuracy"];
+                    return [`${(v / 1000).toFixed(1)}s`, "Avg Response Time"];
+                  }}
+                />
+                <Bar dataKey="accuracy" fill="#3d3d3d" radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -390,23 +390,29 @@ export default function SessionPage() {
     return `${m}:${s.toString().padStart(2, "0")}`;
   }
 
+  function timerColorClass(seconds: number): string {
+    if (seconds < 30) return "text-error";
+    if (seconds < 60) return "text-warning";
+    return "text-foreground-bright";
+  }
+
   // --- Render ---
 
   if (state.status === "loading") {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <p className="text-gray-500">Loading session...</p>
+      <div className="relative flex min-h-[calc(100vh-3rem)] flex-col items-center justify-center bg-background">
+        <p className="text-foreground-muted">Loading session...</p>
       </div>
     );
   }
 
   if (state.status === "error") {
     return (
-      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4">
-        <p className="text-red-600">{state.error}</p>
+      <div className="relative flex min-h-[calc(100vh-3rem)] flex-col items-center justify-center gap-4 bg-background">
+        <p className="text-error">{state.error}</p>
         <button
           onClick={() => router.push("/mental-math")}
-          className="text-sm text-blue-600 hover:underline"
+          className="text-sm text-foreground-muted transition-colors hover:text-foreground"
         >
           Back to Mental Math
         </button>
@@ -416,8 +422,8 @@ export default function SessionPage() {
 
   if (state.status === "completed") {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <p className="text-gray-500">Saving results...</p>
+      <div className="relative flex min-h-[calc(100vh-3rem)] flex-col items-center justify-center bg-background">
+        <p className="text-foreground-muted">Saving results...</p>
       </div>
     );
   }
@@ -427,116 +433,113 @@ export default function SessionPage() {
   const isPaused = state.status === "paused";
 
   return (
-    <div className="mx-auto flex min-h-[70vh] max-w-2xl flex-col">
-      {/* Top bar */}
-      <div className="flex items-center justify-between border-b pb-3">
-        <span className="text-sm text-gray-600">
-          {isOpenEnded
-            ? `Question ${state.currentIndex + 1}`
-            : `Question ${state.currentIndex + 1} of ${state.totalQuestions}`}
-        </span>
-
-        {state.timerEnabled && state.remainingSeconds !== null && (
-          <span
-            className={`text-sm font-mono ${
-              state.remainingSeconds < 30 ? "text-red-600 font-bold" : "text-gray-600"
-            }`}
-          >
-            {formatTime(state.remainingSeconds)}
-          </span>
-        )}
-      </div>
-
+    <div className="relative flex min-h-[calc(100vh-3rem)] flex-col bg-background">
       {/* Question area */}
-      <div className="flex flex-1 flex-col items-center justify-center gap-6 py-12">
+      <div className="flex flex-1 flex-col items-center justify-center px-6">
         {currentQuestion ? (
-          <>
-            <p className="text-4xl font-bold tracking-wide">
+          <div className="flex items-center justify-center gap-4 sm:gap-6 md:gap-8">
+            <span className="font-mono text-5xl font-bold tracking-tight text-foreground-bright sm:text-6xl md:text-7xl lg:text-8xl">
               {currentQuestion.prompt}
-            </p>
-
-            <div className="flex items-center gap-3">
-              <input
-                ref={inputRef}
-                type="text"
-                value={state.inputValue}
-                onChange={(e) =>
-                  dispatch({ type: "SET_INPUT", payload: e.target.value })
-                }
-                onKeyDown={handleKeyDown}
-                disabled={isPaused}
-                placeholder="Your answer"
-                className="w-48 rounded border-2 border-gray-300 px-4 py-2 text-center text-lg focus:border-blue-500 focus:outline-none disabled:bg-gray-100"
-                autoComplete="off"
-              />
-              <button
-                onClick={handleSubmit}
-                disabled={isPaused || !state.inputValue.trim()}
-                className="rounded bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-              >
-                Submit
-              </button>
-            </div>
-          </>
+            </span>
+            <span className="font-mono text-4xl text-foreground-muted sm:text-5xl md:text-6xl lg:text-7xl">
+              =
+            </span>
+            <input
+              ref={inputRef}
+              type="text"
+              value={state.inputValue}
+              onChange={(e) =>
+                dispatch({ type: "SET_INPUT", payload: e.target.value })
+              }
+              onKeyDown={handleKeyDown}
+              disabled={isPaused}
+              placeholder="?"
+              className="w-full max-w-[4ch] bg-transparent font-mono text-5xl font-bold tracking-tight text-foreground-bright outline-none placeholder:text-foreground-muted/30 sm:max-w-[5ch] sm:text-6xl md:text-7xl lg:text-8xl"
+              autoComplete="off"
+            />
+          </div>
         ) : (
-          <p className="text-gray-500">No question available.</p>
+          <p className="text-foreground-muted">No question available.</p>
         )}
       </div>
 
-      {/* Bottom bar */}
-      <div className="flex items-center justify-between border-t pt-3">
-        <div className="flex gap-3">
-          <button
-            onClick={handleSkip}
-            disabled={isPaused}
-            className="rounded border px-4 py-1.5 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50"
-          >
-            Skip
-          </button>
+      {/* Keyboard hints */}
+      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 text-xs text-foreground-muted/50">
+        Enter = Submit &middot; Tab = Skip
+      </div>
 
-          <button
-            onClick={() => dispatch({ type: "COMPLETE" })}
-            className="rounded border border-red-300 px-4 py-1.5 text-sm text-red-600 hover:bg-red-50"
-          >
-            End Session
-          </button>
+      {/* Bottom HUD */}
+      <div className="flex items-center justify-between border-t border-border-subtle bg-background-elevated px-6 py-4">
+        {/* Left: Progress + Mode */}
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-foreground-muted">
+            {isOpenEnded
+              ? `Q${state.currentIndex + 1}`
+              : `${state.currentIndex + 1} / ${state.totalQuestions}`}
+          </span>
+          <span className="rounded border border-border px-2 py-0.5 text-xs text-foreground-muted">
+            {state.mode === "test" ? "Test" : "Practice"}
+          </span>
+        </div>
 
+        {/* Center: Timer */}
+        <div className="flex items-center">
+          {state.timerEnabled && state.remainingSeconds !== null && (
+            <span
+              className={`font-mono text-sm font-bold ${timerColorClass(state.remainingSeconds)}`}
+            >
+              {formatTime(state.remainingSeconds)}
+            </span>
+          )}
+        </div>
+
+        {/* Right: Controls */}
+        <div className="flex items-center gap-2">
           {state.mode === "practice" && (
             <>
               {isPaused ? (
                 <button
                   onClick={handleResume}
-                  className="rounded border border-green-300 px-4 py-1.5 text-sm text-green-700 hover:bg-green-50"
+                  className="rounded-md border border-border px-3 py-1.5 text-sm text-foreground-muted transition-colors hover:border-foreground-muted hover:text-foreground"
                 >
                   Resume
                 </button>
               ) : (
                 <button
                   onClick={handlePause}
-                  className="rounded border px-4 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
+                  className="rounded-md border border-border px-3 py-1.5 text-sm text-foreground-muted transition-colors hover:border-foreground-muted hover:text-foreground"
                 >
                   Pause
                 </button>
               )}
             </>
           )}
-        </div>
 
-        <p className="text-xs text-gray-400">
-          {state.mode === "practice"
-            ? "Scoring: +1 correct, 0 wrong/skipped"
-            : "Scoring: +1 correct, -1 wrong, 0 skipped"}
-        </p>
+          <button
+            onClick={handleSkip}
+            disabled={isPaused}
+            className="rounded-md border border-border px-3 py-1.5 text-sm text-foreground-muted transition-colors hover:border-foreground-muted hover:text-foreground disabled:opacity-50"
+          >
+            Skip
+          </button>
+
+          <button
+            onClick={() => dispatch({ type: "COMPLETE" })}
+            className="rounded-md border border-border px-3 py-1.5 text-sm text-foreground-muted transition-colors hover:border-foreground-muted hover:text-foreground"
+          >
+            End Session
+          </button>
+        </div>
       </div>
 
       {/* Paused overlay */}
       {isPaused && (
-        <div className="fixed inset-0 z-10 flex items-center justify-center bg-white/80">
+        <div className="fixed inset-0 z-10 flex items-center justify-center bg-background/95">
           <div className="text-center">
-            <p className="mb-4 text-xl font-semibold">Session Paused</p>
+            <p className="mb-4 text-xl font-semibold text-foreground-bright">Session Paused</p>
             <button
               onClick={handleResume}
-              className="rounded bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              className="rounded-md border border-border px-6 py-2 text-sm font-medium text-foreground-muted transition-colors hover:border-foreground-muted hover:text-foreground"
             >
               Resume
             </button>

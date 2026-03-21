@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { StatBlock } from "@/components/stat-block";
 
 interface MistakeItem {
   prompt: string;
@@ -20,6 +21,7 @@ interface SessionResults {
   wrong: number;
   skipped: number;
   accuracy: number;
+  totalQuestions: number;
   totalTimeSeconds: number;
   averageResponseTimeSeconds: number;
   withinTargetTimePercent: number;
@@ -82,6 +84,7 @@ export default function ResultsPage() {
           wrong: session.wrong_count ?? 0,
           skipped: session.skipped_count ?? 0,
           accuracy: (session.accuracy ?? 0) * 100,
+          totalQuestions: session.question_count_target ?? questions.length,
           totalTimeSeconds,
           averageResponseTimeSeconds: session.avg_response_time_ms
             ? session.avg_response_time_ms / 1000
@@ -110,7 +113,7 @@ export default function ResultsPage() {
   if (loading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <p className="text-gray-500">Loading results...</p>
+        <p className="text-foreground-muted">Loading results...</p>
       </div>
     );
   }
@@ -118,10 +121,10 @@ export default function ResultsPage() {
   if (error || !results) {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4">
-        <p className="text-red-600">{error ?? "No results found"}</p>
+        <p className="text-error">{error ?? "No results found"}</p>
         <button
           onClick={() => router.push("/mental-math")}
-          className="text-sm text-blue-600 hover:underline"
+          className="text-sm text-foreground-muted transition-colors hover:text-foreground"
         >
           Back to Mental Math
         </button>
@@ -130,117 +133,145 @@ export default function ResultsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <h1 className="mb-6 text-2xl font-bold">Session Results</h1>
+    <div className="flex flex-1 flex-col items-center px-6 py-12">
+      <div className="w-full max-w-3xl space-y-6">
+        {/* Score section */}
+        <div className="rounded-lg border border-border bg-background-elevated p-8">
+          <div className="mb-6 text-center">
+            <p className="font-mono text-6xl font-bold text-foreground-bright">
+              {results.score}
+            </p>
+            <p className="mt-1 text-sm text-foreground-muted">
+              Score &middot; {results.accuracy.toFixed(1)}% accuracy
+            </p>
+          </div>
 
-      {/* Score */}
-      <div className="mb-8 rounded-lg border p-6 text-center">
-        <p className="text-5xl font-bold">{results.score}</p>
-        <p className="mt-1 text-sm text-gray-500">
-          Score ({results.accuracy.toFixed(1)}% accuracy)
-        </p>
-      </div>
-
-      {/* Stats grid */}
-      <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
-        <Stat label="Correct" value={String(results.correct)} />
-        <Stat label="Wrong" value={String(results.wrong)} />
-        <Stat label="Skipped" value={String(results.skipped)} />
-        <Stat label="Total Time" value={formatTime(results.totalTimeSeconds)} />
-        <Stat
-          label="Avg Response"
-          value={`${results.averageResponseTimeSeconds.toFixed(1)}s`}
-        />
-        <Stat
-          label="Within Target"
-          value={`${results.withinTargetTimePercent.toFixed(0)}%`}
-        />
-      </div>
-
-      {/* Metadata */}
-      <div className="mb-8 rounded border bg-gray-50 p-4 text-sm text-gray-600">
-        <p>
-          <span className="font-medium">Mode:</span>{" "}
-          {results.mode === "test" ? "Test" : "Practice"}
-          {results.presetName && ` (${results.presetName})`}
-        </p>
-        {results.levels.length > 0 && (
-          <p>
-            <span className="font-medium">Levels:</span>{" "}
-            {results.levels.map((l) => `L${l}`).join(", ")}
-          </p>
-        )}
-        <p>
-          <span className="font-medium">Timer:</span>{" "}
-          {results.timerEnabled ? "Timed" : "Untimed"}
-        </p>
-        <p className="mt-2 text-xs text-gray-400">
-          {results.mode === "practice"
-            ? "Scoring: +1 correct, 0 wrong, 0 skipped"
-            : "Scoring: +1 correct, -1 wrong, 0 skipped"}
-        </p>
-      </div>
-
-      {/* Mistakes */}
-      {results.mistakes.length > 0 && (
-        <div className="mb-8">
-          <h2 className="mb-3 text-lg font-semibold">Mistakes</h2>
-          <div className="space-y-2">
-            {results.mistakes.map((m, i) => (
-              <div key={i} className="rounded border p-3 text-sm">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="font-medium">{m.prompt}</p>
-                    {m.skipped ? (
-                      <p className="text-gray-500">Skipped</p>
-                    ) : (
-                      <p>
-                        <span className="text-red-600">
-                          Your answer: {m.userAnswer}
-                        </span>
-                        <span className="mx-2 text-gray-300">|</span>
-                        <span className="text-green-600">
-                          Correct: {m.correctAnswer}
-                        </span>
-                      </p>
-                    )}
-                  </div>
-                  {m.responseTimeSeconds !== null && (
-                    <span className="text-xs text-gray-400">
-                      {m.responseTimeSeconds.toFixed(1)}s
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
+          <div className="grid grid-cols-3 gap-6 border-t border-border-subtle pt-6 sm:grid-cols-6">
+            <StatBlock
+              label="Total Time"
+              value={formatTime(results.totalTimeSeconds)}
+            />
+            <StatBlock
+              label="Avg. Time"
+              value={`${results.averageResponseTimeSeconds.toFixed(1)}s`}
+            />
+            <StatBlock
+              label="Questions"
+              value={results.totalQuestions}
+            />
+            <StatBlock
+              label="Correct"
+              value={results.correct}
+              className="[&>span:nth-child(2)]:text-success"
+            />
+            <StatBlock
+              label="Wrong"
+              value={results.wrong}
+              className="[&>span:nth-child(2)]:text-error"
+            />
+            <StatBlock
+              label="Skipped"
+              value={results.skipped}
+            />
           </div>
         </div>
-      )}
 
-      {/* Actions */}
-      <div className="flex gap-4">
-        <Link
-          href="/dashboard"
-          className="rounded border px-5 py-2 text-sm text-gray-600 hover:bg-gray-50"
-        >
-          Back to Dashboard
-        </Link>
-        <Link
-          href="/mental-math"
-          className="rounded bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700"
-        >
-          Start New Session
-        </Link>
+        {/* Session details */}
+        <div className="rounded-lg border border-border-subtle bg-background-elevated p-6">
+          <h2 className="mb-3 text-xs uppercase tracking-wider text-foreground-muted">
+            Session Details
+          </h2>
+          <div className="space-y-1 text-sm">
+            <p>
+              <span className="text-foreground-muted">Mode: </span>
+              <span className="text-foreground">
+                {results.mode === "test" ? "Test" : "Practice"}
+                {results.presetName && ` (${results.presetName})`}
+              </span>
+            </p>
+            {results.levels.length > 0 && (
+              <p>
+                <span className="text-foreground-muted">Levels: </span>
+                <span className="text-foreground">
+                  {results.levels.map((l) => `L${l}`).join(", ")}
+                </span>
+              </p>
+            )}
+            <p>
+              <span className="text-foreground-muted">Timer: </span>
+              <span className="text-foreground">
+                {results.timerEnabled ? "Timed" : "Untimed"}
+              </span>
+            </p>
+          </div>
+          <p className="mt-3 text-xs text-foreground-muted">
+            {results.mode === "practice"
+              ? "Scoring: +1 correct, 0 wrong, 0 skipped"
+              : "Scoring: +1 correct, -1 wrong, 0 skipped"}
+          </p>
+        </div>
+
+        {/* Mistakes */}
+        {results.mistakes.length > 0 && (
+          <div className="rounded-lg border border-border-subtle bg-background-elevated p-6">
+            <h2 className="mb-4 text-xs uppercase tracking-wider text-foreground-muted">
+              Mistakes ({results.mistakes.length})
+            </h2>
+            <div className="space-y-2">
+              {results.mistakes.map((m, i) => (
+                <div
+                  key={i}
+                  className="rounded-md border border-border bg-background-card p-3"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="font-mono text-sm text-foreground-bright">
+                        {m.prompt}
+                      </p>
+                      {m.skipped ? (
+                        <p className="mt-1 text-sm text-foreground-muted italic">
+                          Skipped
+                        </p>
+                      ) : (
+                        <p className="mt-1 text-sm">
+                          <span className="text-error line-through">
+                            {m.userAnswer}
+                          </span>
+                          <span className="mx-2 text-foreground-muted">&rarr;</span>
+                          <span className="text-success">
+                            {m.correctAnswer}
+                          </span>
+                        </p>
+                      )}
+                    </div>
+                    {m.responseTimeSeconds !== null && (
+                      <span className="font-mono text-xs text-foreground-muted">
+                        {m.responseTimeSeconds.toFixed(1)}s
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Action buttons */}
+        <div className="flex gap-4">
+          <Link
+            href="/dashboard"
+            className="rounded-lg border border-border bg-background-card px-5 py-2.5 text-sm text-foreground transition-all hover:bg-background-hover"
+          >
+            Back to Dashboard
+          </Link>
+          <Link
+            href="/mental-math"
+            className="rounded-lg border border-border bg-background-card px-5 py-2.5 text-sm text-foreground transition-all hover:bg-background-hover"
+          >
+            Start New Session
+          </Link>
+        </div>
       </div>
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded border p-3 text-center">
-      <p className="text-lg font-bold">{value}</p>
-      <p className="text-xs text-gray-500">{label}</p>
     </div>
   );
 }

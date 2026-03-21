@@ -33,11 +33,17 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="w-full max-w-sm space-y-6 p-6">
-      <h1 className="text-2xl font-bold">Log in</h1>
+    <div className="w-full max-w-sm">
+      <h1 className="mb-8 text-center text-lg font-medium text-foreground-bright">
+        Sign in to Quant Prep
+      </h1>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium">
+          <label
+            htmlFor="email"
+            className="mb-2 block text-sm text-foreground-muted"
+          >
             Email
           </label>
           <input
@@ -46,11 +52,15 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="mt-1 w-full rounded border px-3 py-2"
+            className="w-full rounded-md border border-border bg-background-elevated px-4 py-2.5 text-foreground outline-none transition-colors placeholder:text-foreground-muted/50 focus:border-foreground-muted"
+            placeholder="you@example.com"
           />
         </div>
         <div>
-          <label htmlFor="password" className="block text-sm font-medium">
+          <label
+            htmlFor="password"
+            className="mb-2 block text-sm text-foreground-muted"
+          >
             Password
           </label>
           <input
@@ -59,21 +69,26 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="mt-1 w-full rounded border px-3 py-2"
+            className="w-full rounded-md border border-border bg-background-elevated px-4 py-2.5 text-foreground outline-none transition-colors placeholder:text-foreground-muted/50 focus:border-foreground-muted"
+            placeholder="••••••••"
           />
         </div>
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-error">{error}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded bg-black py-2 text-white hover:bg-gray-800 disabled:opacity-50"
+          className="w-full rounded-md border border-foreground-muted bg-background-card py-2.5 font-medium text-foreground-bright transition-all hover:bg-background-hover disabled:opacity-50"
         >
-          {loading ? "Logging in..." : "Log in"}
+          {loading ? "Signing in..." : "Sign in"}
         </button>
       </form>
-      <p className="text-center text-sm">
-        Don&apos;t have an account?{" "}
-        <Link href="/signup" className="underline">
+
+      <p className="mt-6 text-center text-sm text-foreground-muted">
+        {"Don't have an account? "}
+        <Link
+          href="/signup"
+          className="text-foreground transition-colors hover:text-foreground-bright"
+        >
           Sign up
         </Link>
       </p>

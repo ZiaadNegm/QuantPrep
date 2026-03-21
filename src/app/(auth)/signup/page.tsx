@@ -40,25 +40,36 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="w-full max-w-sm space-y-4 p-6 text-center">
-        <h1 className="text-2xl font-bold">Check your email</h1>
-        <p className="text-sm text-gray-600">
+      <div className="w-full max-w-sm text-center">
+        <h1 className="mb-4 text-lg font-medium text-foreground-bright">
+          Check your email
+        </h1>
+        <p className="text-sm text-foreground-muted">
           We sent you a confirmation link. Please check your email to complete
           signup.
         </p>
-        <Link href="/login" className="text-sm underline">
-          Back to login
+        <Link
+          href="/login"
+          className="mt-4 inline-block text-sm text-foreground transition-colors hover:text-foreground-bright"
+        >
+          Back to sign in
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-sm space-y-6 p-6">
-      <h1 className="text-2xl font-bold">Sign up</h1>
+    <div className="w-full max-w-sm">
+      <h1 className="mb-8 text-center text-lg font-medium text-foreground-bright">
+        Create your account
+      </h1>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="displayName" className="block text-sm font-medium">
+          <label
+            htmlFor="displayName"
+            className="mb-2 block text-sm text-foreground-muted"
+          >
             Display name
           </label>
           <input
@@ -67,11 +78,15 @@ export default function SignupPage() {
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             required
-            className="mt-1 w-full rounded border px-3 py-2"
+            className="w-full rounded-md border border-border bg-background-elevated px-4 py-2.5 text-foreground outline-none transition-colors placeholder:text-foreground-muted/50 focus:border-foreground-muted"
+            placeholder="Your name"
           />
         </div>
         <div>
-          <label htmlFor="email" className="block text-sm font-medium">
+          <label
+            htmlFor="email"
+            className="mb-2 block text-sm text-foreground-muted"
+          >
             Email
           </label>
           <input
@@ -80,11 +95,15 @@ export default function SignupPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="mt-1 w-full rounded border px-3 py-2"
+            className="w-full rounded-md border border-border bg-background-elevated px-4 py-2.5 text-foreground outline-none transition-colors placeholder:text-foreground-muted/50 focus:border-foreground-muted"
+            placeholder="you@example.com"
           />
         </div>
         <div>
-          <label htmlFor="password" className="block text-sm font-medium">
+          <label
+            htmlFor="password"
+            className="mb-2 block text-sm text-foreground-muted"
+          >
             Password
           </label>
           <input
@@ -93,22 +112,27 @@ export default function SignupPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="mt-1 w-full rounded border px-3 py-2"
+            className="w-full rounded-md border border-border bg-background-elevated px-4 py-2.5 text-foreground outline-none transition-colors placeholder:text-foreground-muted/50 focus:border-foreground-muted"
+            placeholder="••••••••"
           />
         </div>
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-error">{error}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded bg-black py-2 text-white hover:bg-gray-800 disabled:opacity-50"
+          className="w-full rounded-md border border-foreground-muted bg-background-card py-2.5 font-medium text-foreground-bright transition-all hover:bg-background-hover disabled:opacity-50"
         >
-          {loading ? "Signing up..." : "Sign up"}
+          {loading ? "Creating account..." : "Sign up"}
         </button>
       </form>
-      <p className="text-center text-sm">
+
+      <p className="mt-6 text-center text-sm text-foreground-muted">
         Already have an account?{" "}
-        <Link href="/login" className="underline">
-          Log in
+        <Link
+          href="/login"
+          className="text-foreground transition-colors hover:text-foreground-bright"
+        >
+          Sign in
         </Link>
       </p>
     </div>
